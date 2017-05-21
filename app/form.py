@@ -1,0 +1,19 @@
+# coding: utf-8
+
+from flask_wtf import FlaskForm
+from wtforms import StringField, IntegerField, PasswordField
+from wtforms.validators import DataRequired
+
+class LoginForm(FlaskForm):
+    name = StringField(u'用户名', validators=[DataRequired()])
+    passwd = PasswordField(u'密码', validators=[DataRequired()])
+class PasswdForm(FlaskForm):
+    old_pass = PasswordField(u'旧密码', validators=[DataRequired()])
+    new_pass = PasswordField(u'新密码', validators=[DataRequired()])
+    rep_pass = PasswordField(u'重复密码', validators=[DataRequired()])
+class MysqlDbForm(FlaskForm):
+    name = StringField(u'名称', validators=[DataRequired()])
+    host = StringField(u'主机', validators=[DataRequired()])
+    port = IntegerField(u'端口', validators=[DataRequired()])
+    user = StringField(u'用户名', validators=[DataRequired()])
+    password = PasswordField(u'密码')

@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block menu %}
+ <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
+              <div class="menu_section">
+                <h3>数据库管理</h3>
+                <ul class="nav side-menu">
+                  {% if current_user.role == 'dev' %}
+                  <li><a><i class="fa"></i> 开发人员 <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li><a href="index.html">我的工单</a></li>
+                      <li><a href="index2.html">发起sql工单</a></li>
+                      <li><a href="index3.html">工单图表</a></li>
+                    </ul>
+                  </li>
+                  {% endif %}
+                  {% if current_user.role == 'audit' %}
+                  <li><a><i class="fa"></i> 审核人员 <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li><a href="index.html">我的工单</a></li>
+                      <li><a href="index2.html">待审核工单</a></li>
+                      <li><a href="index3.html">工单图表</a></li>
+                    </ul>
+                  </li>
+                  {% endif %}
+                  {% if current_user.role == 'admin' %}
+                  <li><a><i class="fa"></i> 管理人员 <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li><a href="{{url_for('mysql_db')}}">MySQL数据库</a></li>
+                      <li><a href="index2.html">人员管理</a></li>
+                      <li><a href="index3.html">工单图表</a></li>
+                    </ul>
+                  </li>
+                  {% endif %}
+
+                </ul>
+              </div>
+
+
+            </div>
+
+{% endblock %}
+
