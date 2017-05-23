@@ -11,38 +11,38 @@
                   </div>
                   <div class="x_content">
                     <br />
-                    <form id="demo-form2" data-parsley-validate class="form-horizontal form-label-left" method="post" action="{{ url_for('mysql_db_update', id=id) }}">
+                    <form id="demo-form2" data-parsley-validate class="form-horizontal form-label-left" method="post" action="{{ url_for('mysql_db_update', id=dbconfig.id) }}">
                        {{ form.hidden_tag() }}
                       <div class="form-group">
                         <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">名称<span class="required">*</span>
                         </label>
                         <div class="col-md-6 col-sm-6 col-xs-12">
-                          <input type="text" id="{{ form.name.name }}" name="{{ form.name.name }}" value="{{ form.name.data }}" required="required" class="form-control col-md-7 col-xs-12">
+                          <input type="text" id="{{ form.name.name }}" name="{{ form.name.name }}" value="{{ dbconfig.name }}" required="required" class="form-control col-md-7 col-xs-12">
                         </div>
                       </div>
                       <div class="form-group">
                         <label class="control-label col-md-3 col-sm-3 col-xs-12" for="last-name">主机 <span class="required">*</span>
                         </label>
                         <div class="col-md-6 col-sm-6 col-xs-12">
-                          <input type="text" id="{{ form.host.name }}" name="{{ form.host.name }}" value="{{ form.host.data }}" required="required" class="form-control col-md-7 col-xs-12">
+                          <input type="text" id="{{ form.host.name }}" name="{{ form.host.name }}" value="{{ dbconfig.host }}" required="required" class="form-control col-md-7 col-xs-12">
                         </div>
                       </div>
                       <div class="form-group">
                         <label for="middle-name" class="control-label col-md-3 col-sm-3 col-xs-12">端口</label>
                         <div class="col-md-6 col-sm-6 col-xs-12">
-                          <input id="{{ form.port.name }}" name="{{ form.port.name }}" value="{{ form.port.data }}" class="form-control col-md-7 col-xs-12" type="text"  >
+                          <input id="{{ form.port.name }}" name="{{ form.port.name }}" value="{{ dbconfig.port }}" class="form-control col-md-7 col-xs-12" type="text"  >
                         </div>
                       </div>
                       <div class="form-group">
                         <label for="middle-name" class="control-label col-md-3 col-sm-3 col-xs-12">用户名<span class="required">*</span></label>
                         <div class="col-md-6 col-sm-6 col-xs-12">
-                          <input id="{{ form.user.name }}" name="{{ form.user.name }}" value="{{ form.user.data }}" class="form-control col-md-7 col-xs-12" type="text"  >
+                          <input id="{{ form.user.name }}" name="{{ form.user.name }}" value="{{ dbconfig.user }}" class="form-control col-md-7 col-xs-12" type="text"  >
                         </div>
                       </div>
                       <div class="form-group">
                         <label for="middle-name" class="control-label col-md-3 col-sm-3 col-xs-12">密码</label>
                         <div class="col-md-6 col-sm-6 col-xs-12">
-                          <input id="{{ form.password.name }}" name="{{ form.password.name }}" class="form-control col-md-7 col-xs-12" type="password"  >
+                          <input id="{{ form.password.name }}" name="{{ dbconfig.password }}" class="form-control col-md-7 col-xs-12" type="password"  >
                         </div>
                       </div>
 

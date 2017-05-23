@@ -17,3 +17,8 @@ class MysqlDbForm(FlaskForm):
     port = IntegerField(u'端口', validators=[DataRequired()])
     user = StringField(u'用户名', validators=[DataRequired()])
     password = PasswordField(u'密码')
+class UserForm(FlaskForm):
+    name = StringField(u'用户名', validators=[DataRequired()])
+    passwd = PasswordField(u'密码', validators=[DataRequired()])
+    role = StringField(u'角色', validators=[DataRequired()])
+    email = StringField(u'邮箱', validators=[DataRequired()])

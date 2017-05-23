@@ -89,12 +89,8 @@ def mysql_db_update(id):
         dbconfig.update_time = datetime.now()
         db.session.commit()
         return redirect('mysql_db')
-    form.name.data = dbconfig.name
-    form.host.data = dbconfig.host
-    form.port.data = dbconfig.port
-    form.user.data = dbconfig.user
 
-    return render_template('mysql_db_update.html', form=form, id=id)
+    return render_template('mysql_db_update.html', form=form, dbconfig=dbconfig)
 @app.route('/mysql_db/delete/<int:id>')
 @admin_permission.require()
 def mysql_db_delete(id):
@@ -102,4 +98,44 @@ def mysql_db_delete(id):
     db.session.delete(dbconfig)
     db.session.commit()
     return redirect('mysql_db')
+
+@app.route('/user')
+@admin_permission.require()
+def user():
+    users = User.query.filter(User.id != current_user.id)
+
+    return render_template('user.html', users=users)
+@app.route('/user/create', methods = ['GET', 'POST'])
+@admin_permission.require()
+def user_create():
+    form = UserForm()
+    if form.validate_on_submit():
+        user = User()
+        user.name = form.name.data
+        user.hash_pass = generate_password_hash(form.passwd.data)
+        user.role = form.role.data
+        user.email = form.email.data
+        db.session.add(user)
+        db.session.commit()
+        return redirect('user')
+    return render_template('user_create.html', form=form)
+@app.route('/user/update/<int:id>', methods = ['GET', 'POST'])
+@admin_permission.require()
+def user_update(id):
+    user = User.query.get(id)
+    form = UserForm()
+    if form.validate_on_submit():
+        user.hash_pass = generate_password_hash(form.passwd.data)
+        user.email = form.email.data
+        db.session.commit()
+        return redirect('user')
+    return render_template('user_update.html', form=form, user=user)
+@app.route('/user/delete/<int:id>', methods = ['GET', 'POST'])
+@admin_permission.require()
+def user_delete(id):
+    user = User.query.get(id)
+    db.session.delete(user)
+    db.session.commit()
+    return redirect('user')
+
 
