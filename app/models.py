@@ -36,3 +36,22 @@ class DbConfig(db.Model):
     password = db.Column(db.String(300))
     create_time = db.Column(db.DateTime, default=datetime.now())
     update_time = db.Column(db.DateTime, default=datetime.now())
+class Work(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(128), unique=True)
+    dev = db.Column(db.String(64))
+    audit = db.Column(db.String(64))
+    sql_content = db.Column(db.Text)
+    db_config = db.Column(db.String(64))
+    backup = db.Column(db.Boolean, default=True)
+    status = db.Column(db.Integer, nullable=False)
+    create_time = db.Column(db.DateTime, default=datetime.now())
+    finish_time = db.Column(db.DateTime)
+    man_review_time = db.Column(db.DateTime)
+    auto_review = db.Column(db.Text)
+    execute_result = db.Column(db.Text)
+
+
+
+
+

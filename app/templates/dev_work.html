@@ -1,0 +1,56 @@
+{% extends 'dashboard.html' %}
+
+{% block content %}
+ <div class="right_col" role="main">
+          <div class="">
+
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                <div class="x_panel">
+                  <div class="x_title">
+                    <h2>我的工单</h2>
+                      <ul class="nav navbar-right panel_toolbox">
+                          <li><button type="button" class="btn btn-success btn-sm" onclick="{location.href='{{ url_for('dev_work_create') }}'">新增+</button></li>
+                      </ul>
+                    <div class="clearfix"></div>
+                  </div>
+                  <div class="x_content">
+
+                    <table id="datatable-buttons" class="table table-striped table-bordered">
+
+                      <thead>
+                        <tr>
+                          <th>工单名</th>
+                          <th>数据库</th>
+                          <th>备份</th>
+                          <th>审核人</th>
+                          <th>创建时间</th>
+                          <th>完成时间</th>
+                          <th>状态</th>
+                        </tr>
+                      </thead>
+
+
+                      <tbody>
+                      {% for work in works %}
+                        <tr>
+                          <td>{{ work.name }}</td>
+                          <td>{{ work.db_config }}</td>
+                          <td>{{ work.backup }}</td>
+                          <td>{{ work.audit }}</td>
+                          <td>{{ work.create_time }}</td>
+                          <td>{{ work.finish_time }}</td>
+                          <td>{{ work.status }}</td>
+                          <td><button type="button" class="btn btn-info btn-sm" onclick="{location.href=''}">修改</button><button type="button" class="btn btn-danger btn-sm" onclick="javascript:if (confirm('确定要删除?')) location.href='';">删除</button></td>
+                        </tr>
+                      {% endfor %}
+
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+          </div>
+        </div>
+        <!-- /page content -->
+{% endblock %}

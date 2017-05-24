@@ -16,3 +16,7 @@ MAIL_USE_SSL = int(os.getenv('MAIL_USE_SSL',         True))
 
 # Flask-User settings
 USER_APP_NAME = "inception_web"                # Used by email templates
+
+#Inception settings
+
+INCEPTION_REMOTE_BACKUP_PORT=3306

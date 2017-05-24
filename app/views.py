@@ -1,14 +1,20 @@
 # coding: utf-8
 from app import app, db
-from flask import render_template, redirect, current_app, session
+from flask import render_template, redirect, current_app, session, request
 from flask_login import current_user,login_user, logout_user ,login_required
 from app.form import *
 from app.models import *
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_principal import Identity, AnonymousIdentity, identity_changed, Permission, RoleNeed
 from datetime import datetime
+import json, requests
+from app.inception import Inception
+
+inc=Inception()
 
 admin_permission = Permission(RoleNeed('admin'))
+dev_permission = Permission(RoleNeed('dev'))
+audit_permission = Permission(RoleNeed('audit'))
 
 @app.route('/dashboard')
 @login_required
@@ -69,7 +75,7 @@ def mysql_db_create():
         dbconfig.host = form.host.data
         dbconfig.port = form.port.data
         dbconfig.user = form.user.data
-        dbconfig.password = generate_password_hash(form.password.data)
+        dbconfig.password = form.password.data
         db.session.add(dbconfig)
         db.session.commit()
         return redirect('mysql_db')
@@ -85,7 +91,7 @@ def mysql_db_update(id):
         dbconfig.port = form.port.data
         dbconfig.user = form.user.data
         if form.password.data is not None:
-            dbconfig.password = generate_password_hash(form.password.data)
+            dbconfig.password = form.password.data
         dbconfig.update_time = datetime.now()
         db.session.commit()
         return redirect('mysql_db')
@@ -102,7 +108,7 @@ def mysql_db_delete(id):
 @app.route('/user')
 @admin_permission.require()
 def user():
-    users = User.query.filter(User.id != current_user.id)
+    users = User.query.filter(User.role != 'admin')
 
     return render_template('user.html', users=users)
 @app.route('/user/create', methods = ['GET', 'POST'])
@@ -138,4 +144,53 @@ def user_delete(id):
     db.session.commit()
     return redirect('user')
 
+
+@app.route('/dev_work')
+@dev_permission.require()
+def dev_work():
+    works = Work.query.filter(Work.dev == current_user.name)
+    return render_template('dev_work.html', works=works)
+@app.route('/dev_work/create', methods = ['GET', 'POST'])
+@dev_permission.require()
+def dev_work_create():
+    db_configs = DbConfig.query.all()
+    audits = User.query.filter(User.role == 'audit')
+    form = WorkForm()
+    if form.validate_on_submit():
+        work = Work()
+        work.name = form.name.data
+        work.db_config = form.db_config.data
+        work.backup = form.backup.data
+        work.dev = current_user.name
+        work.audit = form.audit.data
+        work.sql_content = form.sql_content.data
+        work.status = 1
+
+        db.session.add(work)
+        db.session.commit()
+        return redirect('dev_work')
+    return render_template('dev_work_create.html', form=form, db_configs=db_configs, audits=audits)
+@app.route('/dev_work/check', methods = ['POST'])
+@dev_permission.require()
+def dev_work_check():
+    data = request.form
+    sqlContent=data['sqlContent']
+    dbConfig=data['dbConfig']
+    finalResult = {'status': 0, 'msg': 'ok', 'data': []}
+    if sqlContent is None or dbConfig is None:
+        finalResult['status'] = 1
+        finalResult['msg'] = '页面提交参数可能为空'
+        return json.dumps(finalResult)
+    sqlContent = sqlContent.rstrip()
+    if sqlContent[-1] != ";":
+        finalResult['status'] = 1
+        finalResult['msg'] = 'SQL语句结尾没有以;结尾，请重新修改并提交！'
+        return json.dumps(finalResult)
+    result = inc.sqlautoReview(sqlContent, dbConfig)
+    if result is None or len(result) == 0:
+        finalResult['status'] = 1
+        finalResult['msg'] = 'inception返回的结果集为空！可能是SQL语句有语法错误'
+        return json.dumps(finalResult)
+    finalResult['data'] = result
+    return json.dumps(finalResult)
 
