@@ -1,13 +1,13 @@
 # coding: utf-8
 from app import app, db
-from flask import render_template, redirect, current_app, session, request
+from flask import render_template, redirect, current_app, session, request, flash
 from flask_login import current_user,login_user, logout_user ,login_required
 from app.form import *
 from app.models import *
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_principal import Identity, AnonymousIdentity, identity_changed, Permission, RoleNeed
 from datetime import datetime
-import json, requests
+import json, re
 from app.inception import Inception
 
 inc=Inception()
@@ -157,18 +157,42 @@ def dev_work_create():
     audits = User.query.filter(User.role == 'audit')
     form = WorkForm()
     if form.validate_on_submit():
-        work = Work()
-        work.name = form.name.data
-        work.db_config = form.db_config.data
-        work.backup = form.backup.data
-        work.dev = current_user.name
-        work.audit = form.audit.data
-        work.sql_content = form.sql_content.data
-        work.status = 1
+        sqlContent=form.sql_content.data
+        dbConfig=form.db_config.data
+        isBackup=form.backup.data
+        sqlContent = sqlContent.rstrip()
+        if sqlContent[-1] == ";":
+            work = Work()
+            work.name = form.name.data
+            work.db_config = dbConfig
+            work.backup = isBackup
+            work.dev = current_user.name
+            work.audit = form.audit.data
+            work.sql_content = sqlContent
 
-        db.session.add(work)
-        db.session.commit()
-        return redirect('dev_work')
+            result = inc.sqlautoReview(sqlContent, dbConfig, isBackup)
+            if result or len(result) != 0:
+                jsonResult = json.dumps(result)
+                work.status = 1
+                for row in result:
+                    if row[2] == 2:
+                        work.status = 2
+                        break
+                    elif re.match(r"\w*comments\w*", row[4]):
+                        work.status = 2
+                        break
+                work.create_time=datetime.now()
+                db.session.add(work)
+                db.session.commit()
+                return redirect('dev_work')
+            else:
+                flash('inception返回的结果集为空！可能是SQL语句有语法错误!')
+        else:
+            flash(u'SQL语句结尾没有以;结尾，请重新修改并提交！')
+
+
+
+
     return render_template('dev_work_create.html', form=form, db_configs=db_configs, audits=audits)
 @app.route('/dev_work/check', methods = ['POST'])
 @dev_permission.require()
@@ -177,18 +201,18 @@ def dev_work_check():
     sqlContent=data['sqlContent']
     dbConfig=data['dbConfig']
     finalResult = {'status': 0, 'msg': 'ok', 'data': []}
-    if sqlContent is None or dbConfig is None:
+    if not sqlContent or not dbConfig:
         finalResult['status'] = 1
-        finalResult['msg'] = '页面提交参数可能为空'
+        finalResult['msg'] = '数据库或SQL内容可能为空'
         return json.dumps(finalResult)
     sqlContent = sqlContent.rstrip()
     if sqlContent[-1] != ";":
-        finalResult['status'] = 1
+        finalResult['status'] = 2
         finalResult['msg'] = 'SQL语句结尾没有以;结尾，请重新修改并提交！'
         return json.dumps(finalResult)
     result = inc.sqlautoReview(sqlContent, dbConfig)
     if result is None or len(result) == 0:
-        finalResult['status'] = 1
+        finalResult['status'] = 3
         finalResult['msg'] = 'inception返回的结果集为空！可能是SQL语句有语法错误'
         return json.dumps(finalResult)
     finalResult['data'] = result

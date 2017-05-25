@@ -38,9 +38,9 @@
                           <td>{{ work.backup }}</td>
                           <td>{{ work.audit }}</td>
                           <td>{{ work.create_time }}</td>
-                          <td>{{ work.finish_time }}</td>
-                          <td>{{ work.status }}</td>
-                          <td><button type="button" class="btn btn-info btn-sm" onclick="{location.href=''}">修改</button><button type="button" class="btn btn-danger btn-sm" onclick="javascript:if (confirm('确定要删除?')) location.href='';">删除</button></td>
+                          <td>{% if work.finish_time %}{{ work.finish_time }}{% else %}未确定{% endif %}</td>
+                          <td>{% if work.status == 0 %}结束{% elif work.status == 1%}待人工审核{% elif work.status == 2 %}自动审核失败{% endif %}</td>
+                          <td>{% if work.status ==2 %}<button type="button" class="btn btn-info btn-sm" onclick="{location.href=''}">修改</button>{% endif %}<button type="button" class="btn btn-danger btn-sm" onclick="javascript:if (confirm('确定要删除?')) location.href='';">删除</button></td>
                         </tr>
                       {% endfor %}
 

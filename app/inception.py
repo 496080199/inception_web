@@ -14,7 +14,7 @@ class Inception(object):
     def __init__(self):
         try:
             self.inception_host = config.get('INCEPTION_HOST')
-            self.inception_port = config.get('INCEPTION_PORT')
+            self.inception_port = int(config.get('INCEPTION_PORT'))
             
             self.inception_remote_backup_host = config.get('INCEPTION_REMOTE_BACKUP_HOST')
             self.inception_remote_backup_port = int(config.get( 'INCEPTION_REMOTE_BACKUP_PORT'))
@@ -50,21 +50,20 @@ class Inception(object):
         #这里无需判断字符串是否以；结尾，直接抛给inception enable check即可。
         #if sqlContent[-1] != ";":
             #sqlContent = sqlContent + ";"
+        criticalddl=config.get('CRITICAL_DDL_ON_OFF')
+        if criticalddl == "ON" :
+            criticalDDL_check = self.criticalDDL(sqlContent)
+        else:
+            criticalDDL_check = None
+        if criticalDDL_check is not None:
+            result = criticalDDL_check
+        else:
+            sql = "/*--user=%s;--password=%s;--host=%s;--enable-check=1;--port=%s;*/\
+              inception_magic_start;\
+              %s\
+              inception_magic_commit;" % (dbUser, dbPassword, dbHost, str(dbPort), sqlContent)
+            result = self._fetchall(sql, self.inception_host, self.inception_port, '', '', '')
 
-        if hasattr(config, 'CRITICAL_DDL_ON_OFF') == True:
-            if getattr(config, 'CRITICAL_DDL_ON_OFF') == "on":
-                criticalDDL_check = self.criticalDDL(sqlContent)
-            else:
-                criticalDDL_check = None
-
-            if criticalDDL_check is not None:
-                result = criticalDDL_check
-            else:
-                sql="/*--user=%s;--password=%s;--host=%s;--enable-check=1;--port=%s;*/\
-                  inception_magic_start;\
-                  %s\
-                  inception_magic_commit;" % (dbUser, dbPassword, dbHost, str(dbPort), sqlContent)
-                result = self._fetchall(sql, self.inception_host, self.inception_port, '', '', '')
         return result
         
     def executeFinal(self, work, dictConn):
@@ -142,7 +141,7 @@ class Inception(object):
         cur = None
 
         try:
-            conn=MySQLdb.connect(host=paramHost, user=paramUser, passwd=paramPasswd, db=paramDb, port=paramPort, charset='utf8mb4')
+            conn=MySQLdb.connect(host=paramHost, user=paramUser, passwd=paramPasswd, db=paramDb, port=paramPort, charset='utf8')
             cur=conn.cursor()
             ret=cur.execute(sql)
             result=cur.fetchall()

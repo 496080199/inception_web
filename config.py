@@ -14,9 +14,16 @@ MAIL_SERVER = os.getenv('MAIL_SERVER',          'smtp.gmail.com')
 MAIL_PORT = int(os.getenv('MAIL_PORT',            '465'))
 MAIL_USE_SSL = int(os.getenv('MAIL_USE_SSL',         True))
 
-# Flask-User settings
-USER_APP_NAME = "inception_web"                # Used by email templates
+
 
 #Inception settings
 
+INCEPTION_HOST='192.168.10.30'
+INCEPTION_PORT=6669
+
+INCEPTION_REMOTE_BACKUP_HOST='192.168.10.150'
 INCEPTION_REMOTE_BACKUP_PORT=3306
+INCEPTION_REMOTE_BACKUP_USER='root'
+INCEPTION_REMOTE_BACKUP_PASSWORD='123456'
+
+CRITICAL_DDL_ON_OFF='OFF'
