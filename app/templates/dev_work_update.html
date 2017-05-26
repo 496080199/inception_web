@@ -5,7 +5,7 @@
 
 <div class="right_col" role="main">
     <div class="">
-        <form id="demo-form2" data-parsley-validate class="form-horizontal form-label-left" method="post" action="{{ url_for('dev_work_create') }}">
+        <form id="demo-form2" data-parsley-validate class="form-horizontal form-label-left" method="post" action="{{ url_for('dev_work_update',id=work.id) }}">
             {{ form.hidden_tag() }}
         <div class="col-md-4 col-sm-4 col-xs-4">
                 <div class="x_panel">
@@ -19,41 +19,32 @@
                       <div class="form-group">
                         <label class="control-label col-md-4 col-sm-4 col-xs-12" for="first-name">工单名<span class="required">*</span>
                         </label>
+                          <input id="{{ form.name.name }}" name="{{ form.name.name }}" type="hidden" value="{{ work.name }}">
                         <div class="col-md-8 col-sm-8 col-xs-12">
-                          <input type="text" id="{{ form.name.name }}" name="{{ form.name.name }}" required="required" class="form-control col-md-4 col-xs-4">
+                          {{ work.name }}
                         </div>
                       </div>
                       <div class="form-group">
                         <label class="control-label col-md-4 col-sm-4 col-xs-12" for="last-name">数据库<span class="required">*</span>
                         </label>
+                          <input id="{{ form.db_config.name }}" name="{{ form.db_config.name }}" type="hidden" value="{{ work.db_config }}">
                         <div class="col-md-8 col-sm-8 col-xs-12">
-                          <select id="{{ form.db_config.name }}" name="{{ form.db_config.name }}" required="required" class="form-control">
-                            <option value=""></option>
-                            {% for db_config in db_configs %}
-                            <option value="{{ db_config.name }}">{{ db_config.name }}</option>
-                            {% endfor %}
-                          </select>
+                          {{ work.db_config }}
                         </div>
                       </div>
                       <div class="form-group">
                         <label class="control-label col-md-4 col-sm-4 col-xs-12">备份<span class="required">*</span></label>
+                          <input id="{{ form.backup.name }}" name="{{ form.backup.name }}" type="hidden" value="{{ work.backup }}">
                         <div  class="col-md-8 col-sm-8 col-xs-12">
-                          <select id="{{ form.backup.name }}" name="{{ form.backup.name }}" class="form-control">
-                            <option value="True">是</option>
-                            <option value="False">否</option>
-                          </select>
+                          {% if work.backup == true %}是{% else %}否{% endif %}
                         </div>
                       </div>
                       <div class="form-group">
                         <label class="control-label col-md-4 col-sm-4 col-xs-12" for="last-name">审核人员<span class="required">*</span>
                         </label>
+                          <input id="{{ form.audit.name }}" name="{{ form.audit.name }}" type="hidden" value="{{ work.audit }}">
                         <div class="col-md-8 col-sm-8 col-xs-12">
-                          <select id="{{ form.audit.name }}" name="{{ form.audit.name }}" required="required" class="form-control">
-                            <option value=""></option>
-                            {% for audit in audits %}
-                            <option value="{{ audit.name }}">{{ audit.name }}</option>
-                            {% endfor %}
-                          </select>
+                          {{ work.audit }}
                         </div>
                       </div>
 
@@ -91,7 +82,7 @@
                         <div class="col-md-12 col-sm-12 col-xs-12 ">
                            <label for="message">SQL内容:</label>
                             <textarea id="{{ form.sql_content.name }}" name="{{ form.sql_content.name }}" required="required" class="form-control" name="message" data-parsley-trigger="keyup" placeholder="请输入类似sql： use test; create table t1( id int);"
-                            data-parsley-validation-threshold="50" rows="20"></textarea>
+                            data-parsley-validation-threshold="50" rows="20">{{ work.sql_content }}</textarea>
                             <br>
                             <button id="slqcheck" type="button" class="btn btn-info" onclick="sqlcheck()">检查SQL</button>
                          </div>

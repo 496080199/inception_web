@@ -9,7 +9,7 @@
                   <div class="x_title">
                     <h2>我的工单</h2>
                       <ul class="nav navbar-right panel_toolbox">
-                          <li><button type="button" class="btn btn-success btn-sm" onclick="{location.href='{{ url_for('dev_work_create') }}'">新增+</button></li>
+                          <li><button type="button" class="btn btn-success btn-sm" onclick="{location.href='{{ url_for('dev_work_create') }}'}">新增+</button></li>
                       </ul>
                     <div class="clearfix"></div>
                   </div>
@@ -26,6 +26,7 @@
                           <th>创建时间</th>
                           <th>完成时间</th>
                           <th>状态</th>
+                          <th>操作</th>
                         </tr>
                       </thead>
 
@@ -35,12 +36,12 @@
                         <tr>
                           <td>{{ work.name }}</td>
                           <td>{{ work.db_config }}</td>
-                          <td>{{ work.backup }}</td>
+                          <td>{% if work.backup == true %}是{% else %}否{% endif %}</td>
                           <td>{{ work.audit }}</td>
                           <td>{{ work.create_time }}</td>
                           <td>{% if work.finish_time %}{{ work.finish_time }}{% else %}未确定{% endif %}</td>
-                          <td>{% if work.status == 0 %}结束{% elif work.status == 1%}待人工审核{% elif work.status == 2 %}自动审核失败{% endif %}</td>
-                          <td>{% if work.status ==2 %}<button type="button" class="btn btn-info btn-sm" onclick="{location.href=''}">修改</button>{% endif %}<button type="button" class="btn btn-danger btn-sm" onclick="javascript:if (confirm('确定要删除?')) location.href='';">删除</button></td>
+                          <td>{% if work.status == 0 %}结束{% elif work.status == 1%}待人工审核{% elif work.status == 2 %}自动审核失败{% elif work.status == 3 %}执行中{% elif work.status == 4 %}执行异常{% elif work.status == 5 %}开发人中止{% elif work.status == 6 %}审核人中止{% elif work.status == 7 %}管理员中止{% endif %}</td>
+                          <td>{% if work.status ==2 %}<button type="button" class="btn btn-info btn-sm" onclick="{location.href='{{ url_for('dev_work_update',id=work.id) }}'}">修改</button>{% endif %}{% if work.status == 2 %}<button type="button" class="btn btn-danger btn-sm" onclick="javascript:if (confirm('确定要删除?')) location.href='{{ url_for('dev_work_delete',id=work.id) }}';">删除</button>{% endif %}{% if work.status ==  1 %}<button type="button" class="btn btn-danger btn-sm" onclick="javascript:if (confirm('确定要终止?')) location.href='{{ url_for('dev_work_stop',id=work.id) }}';">终止</button>{% endif %}</td>
                         </tr>
                       {% endfor %}
 

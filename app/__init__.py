@@ -23,12 +23,15 @@ from app.models import *
 db.create_all()
 
 
-#admin=User()
-#admin.name='admin'
-#admin.email='admin@admin.cn'
-#admin.hash_pass=generate_password_hash('admin')
-#db.session.add(admin)
-#db.session.commit()
+admin=User()
+admin.name='admin'
+admin.email='admin@admin.cn'
+admin.hash_pass=generate_password_hash('admin')
+admin.role='admin'
+user=User.query.filter(User.name == 'admin').first()
+if not user:
+    db.session.add(admin)
+    db.session.commit()
 
 
 @login_manager.user_loader

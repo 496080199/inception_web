@@ -23,8 +23,7 @@ def dashboard():
 
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
-    if current_user.is_authenticated:
-        return redirect('dashboard')
+
     form=LoginForm()
     if form.validate_on_submit():
         user=User.query.filter(User.name == form.name.data).first()
@@ -190,10 +189,57 @@ def dev_work_create():
         else:
             flash(u'SQL语句结尾没有以;结尾，请重新修改并提交！')
 
-
-
-
     return render_template('dev_work_create.html', form=form, db_configs=db_configs, audits=audits)
+@app.route('/dev_work/update/<int:id>', methods = ['GET', 'POST'])
+@dev_permission.require()
+def dev_work_update(id):
+    work=Work.query.get(id)
+    db_configs = DbConfig.query.all()
+    audits = User.query.filter(User.role == 'audit')
+    form = WorkForm()
+    if form.validate_on_submit():
+        sqlContent = form.sql_content.data.rstrip()
+        if sqlContent[-1] == ";":
+            result = inc.sqlautoReview(sqlContent, work.db_config, work.backup)
+            if result or len(result) != 0:
+                jsonResult = json.dumps(result)
+                work.status = 1
+                for row in result:
+                    if row[2] == 2:
+                        work.status = 2
+                        break
+                    elif re.match(r"\w*comments\w*", row[4]):
+                        work.status = 2
+                        break
+                work.sql_content = sqlContent
+                db.session.commit()
+                return redirect('dev_work')
+            else:
+                flash('inception返回的结果集为空！可能是SQL语句有语法错误!')
+        else:
+            flash(u'SQL语句结尾没有以;结尾，请重新修改并提交！')
+    return render_template('dev_work_update.html', form=form, db_configs=db_configs, audits=audits, work=work)
+@app.route('/dev_work/delete/<int:id>', methods = ['GET', 'POST'])
+@dev_permission.require()
+def dev_work_delete(id):
+    work = Work.query.get(id)
+    db.session.delete(work)
+    db.session.commit()
+    return redirect('dev_work')
+@app.route('/dev_work/stop/<int:id>', methods = ['GET', 'POST'])
+@dev_permission.require()
+def dev_work_stop(id):
+    work = Work.query.get(id)
+    if current_user.role == 'dev':
+        work.status = 5
+    elif current_user.role == 'audit':
+        work.status = 6
+    else:
+        work.status = 7
+    work.finish_time = datetime.now()
+    db.session.commit()
+    return redirect('dev_work')
+
 @app.route('/dev_work/check', methods = ['POST'])
 @dev_permission.require()
 def dev_work_check():
