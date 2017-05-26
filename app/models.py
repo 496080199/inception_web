@@ -8,13 +8,14 @@ class User(db.Model):
     name = db.Column(db.String(64), unique = True)
     email = db.Column(db.String(120), unique = True)
     role = db.Column(db.String(120))
+    srole =db.Column(db.Integer, default=0)
     hash_pass = db.Column(db.String(200))
 
     def is_authenticated(self):
-        return True
+        return False
 
     def is_active(self):
-        return True
+        return False
 
     def is_anonymous(self):
         return False

@@ -1,6 +1,6 @@
 # coding: utf-8
 from app import app, db
-from flask import render_template, redirect, current_app, session, request, flash
+from flask import render_template, redirect, current_app, g, session, request, flash
 from flask_login import current_user,login_user, logout_user ,login_required
 from app.form import *
 from app.models import *
@@ -16,6 +16,10 @@ admin_permission = Permission(RoleNeed('admin'))
 dev_permission = Permission(RoleNeed('dev'))
 audit_permission = Permission(RoleNeed('audit'))
 
+@app.before_request
+def before_request():
+    g.user = current_user
+
 @app.route('/dashboard')
 @login_required
 def dashboard():
@@ -23,7 +27,8 @@ def dashboard():
 
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
-
+    if current_user.is_authenticated:
+        return redirect('dashboard')
     form=LoginForm()
     if form.validate_on_submit():
         user=User.query.filter(User.name == form.name.data).first()
@@ -142,8 +147,16 @@ def user_delete(id):
     db.session.delete(user)
     db.session.commit()
     return redirect('user')
-
-
+@app.route('/user/srole/<int:id>')
+@admin_permission.require()
+def user_srole(id):
+    user = User.query.get(id)
+    if user.srole == 0:
+        user.srole = 1
+    else:
+        user.srole = 0
+    db.session.commit()
+    return redirect('user')
 @app.route('/dev_work')
 @dev_permission.require()
 def dev_work():
@@ -180,7 +193,8 @@ def dev_work_create():
                     elif re.match(r"\w*comments\w*", row[4]):
                         work.status = 2
                         break
-                work.create_time=datetime.now()
+                work.auto_review = jsonResult
+                work.create_time = datetime.now()
                 db.session.add(work)
                 db.session.commit()
                 return redirect('dev_work')
@@ -211,6 +225,7 @@ def dev_work_update(id):
                     elif re.match(r"\w*comments\w*", row[4]):
                         work.status = 2
                         break
+                work.auto_review = jsonResult
                 work.sql_content = sqlContent
                 db.session.commit()
                 return redirect('dev_work')
@@ -226,19 +241,32 @@ def dev_work_delete(id):
     db.session.delete(work)
     db.session.commit()
     return redirect('dev_work')
-@app.route('/dev_work/stop/<int:id>', methods = ['GET', 'POST'])
-@dev_permission.require()
-def dev_work_stop(id):
+
+@app.route('/work/view/<int:id>')
+@login_required
+def work_view(id):
+    work = Work.query.get(id)
+    review_content=json.loads(work.auto_review)
+    return render_template('work_view.html', work=work, review_content=review_content)
+
+@app.route('/work/stop/<int:id>')
+@login_required
+def work_stop(id):
     work = Work.query.get(id)
     if current_user.role == 'dev':
         work.status = 5
+        work.finish_time = datetime.now()
+        db.session.commit()
+        return redirect('dev_work')
     elif current_user.role == 'audit':
         work.status = 6
+        work.finish_time = datetime.now()
+        db.session.commit()
+        return redirect('audit_work')
     else:
         work.status = 7
-    work.finish_time = datetime.now()
-    db.session.commit()
-    return redirect('dev_work')
+
+
 
 @app.route('/dev_work/check', methods = ['POST'])
 @dev_permission.require()
@@ -263,4 +291,11 @@ def dev_work_check():
         return json.dumps(finalResult)
     finalResult['data'] = result
     return json.dumps(finalResult)
+
+
+@app.route('/audit_work')
+@audit_permission.require()
+def audit_work():
+    works = Work.query.filter(Work.audit == current_user.name)
+    return render_template('audit_work.html', works=works)
 

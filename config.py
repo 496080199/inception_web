@@ -2,7 +2,7 @@ import os
 
 # Flask settings
 SECRET_KEY = os.getenv('SECRET_KEY',       'THIS IS AN INSECURE SECRET')
-SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL',     'mysql://inception_web:inception_web@192.168.2.253:3306/inception_web?charset=utf8')
+SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL',     'mysql://inception_web:inception_web@localhost:3306/inception_web?charset=utf8')
 SQLALCHEMY_TRACK_MODIFICATIONS=False
 CSRF_ENABLED = True
 
@@ -18,7 +18,7 @@ MAIL_USE_SSL = int(os.getenv('MAIL_USE_SSL',         True))
 
 #Inception settings
 
-INCEPTION_HOST='192.168.30.51'
+INCEPTION_HOST='192.168.10.30'
 INCEPTION_PORT=6669
 
 INCEPTION_REMOTE_BACKUP_HOST='127.0.0.1'

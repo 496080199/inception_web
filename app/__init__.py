@@ -13,6 +13,8 @@ app.config.from_object('config')
 principals = Principal(app)
 
 login_manager = LoginManager(app)
+login_manager.login_view = 'login'
+login_manager.session_protection = 'strong'
 
 mail = Mail(app)
 db = SQLAlchemy(app)
@@ -35,8 +37,11 @@ if not user:
 
 
 @login_manager.user_loader
-def load_user(userid):
-    return User.query.get(userid)
+def load_user(id):
+    return User.query.get(int(id))
+@login_manager.unauthorized_handler
+def unauthorized():
+    return redirect('/login')
 
 @identity_loaded.connect_via(app)
 def on_identity_loaded(sender, identity):
