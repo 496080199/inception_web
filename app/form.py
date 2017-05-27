@@ -26,5 +26,7 @@ class WorkForm(FlaskForm):
     name = StringField(u'工单名', validators=[DataRequired()])
     db_config = StringField(u'数据库', validators=[DataRequired()])
     backup = BooleanField(u'备份', validators=[DataRequired()])
-    audit = StringField(u'工单名', validators=[DataRequired()])
+    audit = StringField(u'审核人', validators=[DataRequired()])
     sql_content = TextAreaField(u'sql内容', validators=[DataRequired()])
+class WorkAssignForm(FlaskForm):
+    audit = StringField(u'审核人', validators=[DataRequired()])

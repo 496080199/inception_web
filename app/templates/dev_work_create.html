@@ -51,7 +51,7 @@
                           <select id="{{ form.audit.name }}" name="{{ form.audit.name }}" required="required" class="form-control">
                             <option value=""></option>
                             {% for audit in audits %}
-                            <option value="{{ audit.name }}">{{ audit.name }}</option>
+                            <option value="{{ audit.name }}">{{ audit.name }}{% if audit.srole == 0 %}(主审核){% elif audit.srole == 1 %}(副审核){% endif %}</option>
                             {% endfor %}
                           </select>
                         </div>
@@ -121,6 +121,7 @@
 		type: "post",
 		url: "{{ url_for('dev_work_check') }}",
 		dataType: "json",
+        contentType: "application/x-www-form-urlencoded; charset=utf-8",
 		data: {
 			'sqlContent': sqlContent,
 			'dbConfig': dbConfig

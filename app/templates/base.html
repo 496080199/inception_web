@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <!-- Meta, title, CSS, favicons, etc. -->
@@ -46,7 +46,7 @@
               </div>
               <div class="profile_info">
                 <span>欢迎,</span>
-                <h2>{{ current_user.name }}</h2>
+                <h2>{{ current_user.name }}{% if current_user.role == 'audit' and current_user.srole == 0 %}(主审核){% elif current_user.role == 'audit' and current_user.srole == 1 %}(副审核){% endif %}</h2>
               </div>
             </div>
             <!-- /menu profile quick info -->

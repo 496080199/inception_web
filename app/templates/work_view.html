@@ -33,9 +33,15 @@
                       </div>
                       <div class=" col-md-3 col-sm-3 col-xs-12">
                           {% if work.status ==  1 %}
-                              <button type="button" class="btn btn-round btn-success btn-lg" onclick="javascript:if (confirm('确定要执行?')) location.href='';">执行</button>
+                              {% if work.srole == 1 %}
+                                        <button type="button" class="btn btn-success btn-round btn-lg" onclick="javascript:location.href='{{ url_for('audit_work_assign', id=work.id) }}';">分派</button>
+                                   {% elif work.srole == 0 %}
+                                        <button type="button" class="btn btn-success btn-round btn-lg" onclick="javascript:if (confirm('确定要执行?')) location.href='{{ url_for('audit_work_execute',id=work.id) }}';">执行</button>
+                              {% endif %}
                               <button type="button" class="btn btn-round btn-danger btn-lg" onclick="javascript:if (confirm('确定要终止?')) location.href='{{ url_for('work_stop',id=work.id) }}';">中止</button>
+
                           {% endif %}
+                              <button type="button" class="btn btn-round btn-info btn-lg" onclick="javascript:location.href='{{ url_for('audit_work') }}';">返回</button>
                       </div>
 
 
@@ -57,18 +63,19 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                    {% set count=0 %}
                                     {% for row in review_content %}
-                                        {% set count=count+1 %}
-                                        <td>{{ count }}</td>
+
+                                    <tr>
+
+                                        <td>{{ row.0 }}</td>
                                         <td>{{ row.5 }}</td>
                                         <td>{{ row.4 }}</td>
                                         <td>{{ row.6 }}</td>
                                         <td>{{ row.9 }}</td>
                                         <td>{{ row.3 }}</td>
-                                    {% endfor %}
+
                                     </tr>
+                                     {% endfor %}
                                 </tbody>
                             </table>
                       </div>

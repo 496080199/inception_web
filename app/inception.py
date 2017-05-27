@@ -1,8 +1,10 @@
 #-*-coding: utf-8-*-
 
-import re
-import json
+import re, sys, json
 import MySQLdb
+
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 
 from app.models import *
@@ -66,12 +68,22 @@ class Inception(object):
 
         return result
         
-    def executeFinal(self, work, dictConn):
+    def executeFinal(self, work):
         '''
         将sql交给inception进行最终执行，并返回执行结果。
         '''
+        print work.db_config
+        dbConfig = DbConfig.query.filter(DbConfig.name == work.db_config).first()
+        if not dbConfig:
+            print("Error: 数据库配置不存在")
+        dbHost = dbConfig.host
+        dbPort = dbConfig.port
+        dbUser = dbConfig.user
+        dbPassword = dbConfig.password
+
+
         strBackup = ""
-        if work.is_backup == True:
+        if work.backup == True:
             strBackup = "--enable-remote-backup;"
         else:
             strBackup = "--disable-remote-backup;"
@@ -80,9 +92,8 @@ class Inception(object):
         sqlSplit = "/*--user=%s; --password=%s; --host=%s; --enable-execute;--port=%s; --enable-ignore-warnings;--enable-split;*/\
              inception_magic_start;\
              %s\
-             inception_magic_commit;" % (dictConn['dbUser'], dictConn['dbPassword'], dictConn['dbHost'], str(dictConn['dbPort']), work.sql_content)
+             inception_magic_commit;" % (dbUser, dbPassword, dbHost, str(dbPort), work.sql_content)
         splitResult = self._fetchall(sqlSplit, self.inception_host, self.inception_port, '', '', '')
-
         tmpList = []
         #对于split好的结果，再次交给inception执行.这里无需保持在长连接里执行，短连接即可. 
         for splitRow in splitResult:
@@ -90,7 +101,7 @@ class Inception(object):
             sqlExecute = "/*--user=%s;--password=%s;--host=%s;--enable-execute;--port=%s; --enable-ignore-warnings;%s*/\
                     inception_magic_start;\
                     %s\
-                    inception_magic_commit;" % (dictConn['dbUser'], dictConn['dbPassword'], dictConn['dbHost'], str(dictConn['dbPort']), strBackup, sqlTmp)
+                    inception_magic_commit;" % (dbUser, dbPassword, dbHost, str(dbPort), strBackup, sqlTmp)
                     
             executeResult = self._fetchall(sqlExecute, self.inception_host, self.inception_port, '', '', '')
             tmpList.append(executeResult)
@@ -139,12 +150,15 @@ class Inception(object):
         result = None
         conn = None
         cur = None
+        sql = sql.encode('utf-8')
 
         try:
-            conn=MySQLdb.connect(host=paramHost, user=paramUser, passwd=paramPasswd, db=paramDb, port=paramPort, charset='utf8')
+            conn=MySQLdb.connect(host=paramHost, user=paramUser, passwd=paramPasswd, db=paramDb, port=paramPort)
+            conn.set_character_set('utf8')
             cur=conn.cursor()
             ret=cur.execute(sql)
             result=cur.fetchall()
+            result=result
         except MySQLdb.Error as e:
             print("Mysql Error %d: %s" % (e.args[0], e.args[1]))
         finally:

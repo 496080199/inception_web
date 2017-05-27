@@ -42,6 +42,7 @@ class Work(db.Model):
     name = db.Column(db.String(128), unique=True)
     dev = db.Column(db.String(64))
     audit = db.Column(db.String(64))
+    srole = db.Column(db.Integer, default=0)
     sql_content = db.Column(db.Text)
     db_config = db.Column(db.String(64))
     backup = db.Column(db.Boolean, default=True)

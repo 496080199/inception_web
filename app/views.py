@@ -9,6 +9,7 @@ from flask_principal import Identity, AnonymousIdentity, identity_changed, Permi
 from datetime import datetime
 import json, re
 from app.inception import Inception
+config=app.config
 
 inc=Inception()
 
@@ -164,7 +165,10 @@ def dev_work():
 @dev_permission.require()
 def dev_work_create():
     db_configs = DbConfig.query.all()
-    audits = User.query.filter(User.role == 'audit')
+    if config.get('AUDIT_SROLE_ON_OFF') == 'ON':
+        audits = User.query.filter(User.role == 'audit', User.srole == 1)
+    else:
+        audits = User.query.filter(User.role == 'audit', User.srole == 0)
     form = WorkForm()
     if form.validate_on_submit():
         sqlContent=form.sql_content.data
@@ -178,6 +182,8 @@ def dev_work_create():
             work.backup = isBackup
             work.dev = current_user.name
             work.audit = form.audit.data
+            audit=User.query.filter(User.name == work.audit).first()
+            work.srole = audit.srole
             work.sql_content = sqlContent
 
             result = inc.sqlautoReview(sqlContent, dbConfig, isBackup)
@@ -193,6 +199,7 @@ def dev_work_create():
                         break
                 work.auto_review = jsonResult
                 work.create_time = datetime.now()
+
                 db.session.add(work)
                 db.session.commit()
                 return redirect('dev_work')
@@ -240,31 +247,6 @@ def dev_work_delete(id):
     db.session.commit()
     return redirect('dev_work')
 
-@app.route('/work/view/<int:id>')
-@login_required
-def work_view(id):
-    work = Work.query.get(id)
-    review_content=json.loads(work.auto_review)
-    return render_template('work_view.html', work=work, review_content=review_content)
-
-@app.route('/work/stop/<int:id>')
-@login_required
-def work_stop(id):
-    work = Work.query.get(id)
-    if current_user.role == 'dev':
-        work.status = 5
-        work.finish_time = datetime.now()
-        db.session.commit()
-        return redirect('dev_work')
-    elif current_user.role == 'audit':
-        work.status = 6
-        work.finish_time = datetime.now()
-        db.session.commit()
-        return redirect('audit_work')
-    else:
-        work.status = 7
-
-
 
 @app.route('/dev_work/check', methods = ['POST'])
 @dev_permission.require()
@@ -294,6 +276,73 @@ def dev_work_check():
 @app.route('/audit_work')
 @audit_permission.require()
 def audit_work():
-    works = Work.query.filter(Work.audit == current_user.name)
+    works = Work.query.filter(Work.audit == current_user.name, Work.status != 1)
     return render_template('audit_work.html', works=works)
+@app.route('/audit_work_pending')
+@audit_permission.require()
+def audit_work_pending():
+    works = Work.query.filter(Work.audit == current_user.name, Work.status == 1)
+    return render_template('audit_work_pending.html', works=works)
+@app.route('/audit_work/assign/<int:id>', methods = ['GET', 'POST'])
+@audit_permission.require()
+def audit_work_assign(id):
+    work = Work.query.get(id)
+    audits = User.query.filter(User.role == 'audit', User.srole == 0)
+    form=WorkAssignForm()
+    if form.validate_on_submit():
+        work.srole = 0
+        work.audit = form.audit.data
+        db.session.commit()
+        return redirect('audit_work')
+
+    return render_template('audit_work_assign.html', form=form, work=work, audits=audits)
+@app.route('/audit_work/execute/<int:id>')
+@audit_permission.require()
+def audit_work_execute(id):
+    work = Work.query.filter(Work.audit == current_user.name, Work.id == id).first()
+    work.status = 3
+    work.man_review_time = datetime.now()
+    db.session.commit()
+
+    (finalStatus, finalList)=inc.executeFinal(work)
+    jsonResult = json.dumps(finalList)
+    work.execute_result = jsonResult
+    work.finish_time = datetime.now()
+    work.status = finalStatus
+    db.session.commit()
+    return redirect('audit_work')
+
+
+
+
+@app.route('/work/view/<int:id>')
+@login_required
+def work_view(id):
+    work = Work.query.get(id)
+    if work.status == 0:
+        review_content=json.loads(work.execute_result)
+    else:
+        review_content=json.loads(work.auto_review)
+    return render_template('work_view.html', work=work, review_content=review_content)
+
+@app.route('/work/stop/<int:id>')
+@login_required
+def work_stop(id):
+    work = Work.query.get(id)
+    if current_user.role == 'dev':
+        work.status = 5
+        work.finish_time = datetime.now()
+        db.session.commit()
+        return redirect('dev_work')
+    elif current_user.role == 'audit':
+        work.status = 6
+        work.finish_time = datetime.now()
+        db.session.commit()
+        return redirect('audit_work')
+    elif current_user.role == 'admin':
+        work.status = 7
+        work.finish_time = datetime.now()
+        db.session.commit()
+
+
 
