@@ -78,6 +78,13 @@
                                      {% endfor %}
                                 </tbody>
                             </table>
+
+                      </div>
+                      <div>
+                          <br><br>
+                          {% if work.status == 0 and work.backup == true %}
+                            <button type="button" class="btn btn-round btn-success" onclick="javascript:location.href='{{ url_for('audit_work_exportsql',id=work.id) }}';">回滚sql</button>
+                          {% endif %}
                       </div>
                   </div>
                   </div>

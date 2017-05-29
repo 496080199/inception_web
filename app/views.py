@@ -1,13 +1,13 @@
 # coding: utf-8
 from app import app, db
-from flask import render_template, redirect, current_app, g, session, request, flash
+from flask import render_template, redirect, current_app, g, session, request, flash, make_response, send_file
 from flask_login import current_user,login_user, logout_user ,login_required
 from app.form import *
 from app.models import *
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_principal import Identity, AnonymousIdentity, identity_changed, Permission, RoleNeed
-from datetime import datetime
-import json, re
+from datetime import datetime, date, timedelta
+import json, re, os
 from app.inception import Inception
 config=app.config
 
@@ -271,6 +271,46 @@ def dev_work_check():
         return json.dumps(finalResult)
     finalResult['data'] = result
     return json.dumps(finalResult)
+@app.route('/dev_chart/<int:days>')
+@dev_permission.require()
+def dev_chart(days=7):
+    dayrange=[]
+    today = date.today()
+    dayrange.append(str(today))
+    for day in range(1,days):
+        datetmp = today-timedelta(days=day)
+        dayrange.append(str(datetmp))
+    dayrange.sort()
+
+    daycounts=[]
+    for i in range(len(dayrange)):
+        daycount=Work.query.filter(Work.dev == current_user.name, Work.create_time.like(dayrange[i]+'%')).count()
+        daycounts.append(daycount)
+    sevendayago = today-timedelta(days=days)
+    works = Work.query.filter(Work.dev == current_user.name, Work.create_time >= sevendayago).group_by(Work.status)
+    workstatus={u'正常结束':0, u'待人工审核':0, u'自动审核失败':0, u'执行中':0, u'执行异常':0, u'开发人中止':0, u'审核人中止':0, u'管理员中止':0}
+    for work in works:
+        if work.status == 0:
+            workstatus[u'正常结束']+=1
+        elif work.status == 1:
+            workstatus[u'待人工审核']+=1
+        elif work.status == 2:
+            workstatus[u'自动审核失败']+=1
+        elif work.status == 3:
+            workstatus[u'执行中']+=1
+        elif work.status == 4:
+            workstatus[u'执行异常']+=1
+        elif work.status == 5:
+            workstatus[u'开发人中止']+=1
+        elif work.status == 6:
+            workstatus[u'审核人中止']+=1
+        elif work.status == 7:
+            workstatus[u'管理员中止']+=1
+
+
+    return render_template('dev_chart.html',dayrange=dayrange, daycounts=daycounts, workstatus=workstatus, days=days)
+
+
 
 
 @app.route('/audit_work')
@@ -311,6 +351,21 @@ def audit_work_execute(id):
     work.status = finalStatus
     db.session.commit()
     return redirect('audit_work')
+@app.route('/audit_work/exportsql/<int:id>')
+@audit_permission.require()
+def audit_work_exportsql(id):
+    listSqlBak = inc.getRollbackSqlList(id)
+    base_dir = os.path.dirname(__file__)
+    tmp_dir = base_dir+'/temp'
+    if not os.path.exists(tmp_dir):
+        os.makedirs(tmp_dir)
+    fp = open(tmp_dir + '/backup.sql', 'w')
+    for i in range(len(listSqlBak)):
+        fp.write(listSqlBak[i]+'\n')
+    fp.close()
+    response = make_response(send_file(tmp_dir + '/backup.sql'))
+    response.headers["Content-Disposition"] = "attachment; filename=ex.sql;"
+    return response
 
 
 

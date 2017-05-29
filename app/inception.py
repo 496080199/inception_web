@@ -119,7 +119,7 @@ class Inception(object):
         return (finalStatus, finalList)
 
     def getRollbackSqlList(self, workId):
-        work = Work.query.filter(Work.id == workId)
+        work = Work.query.filter(Work.id == workId).first()
         listExecuteResult = json.loads(work.execute_result)
         listBackupSql = []
         for row in listExecuteResult:
