@@ -1,7 +1,7 @@
 # coding: utf-8
 from app import app, db
 from flask import render_template, redirect, current_app, g, session, request, flash, make_response, send_file
-from flask_login import current_user,login_user, logout_user ,login_required
+from flask_login import current_user, login_user, logout_user , login_required
 from app.form import *
 from app.models import *
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -9,9 +9,14 @@ from flask_principal import Identity, AnonymousIdentity, identity_changed, Permi
 from datetime import datetime, date, timedelta
 import json, re, os
 from app.inception import Inception
-config=app.config
+from sqlalchemy import func
+from app.email import *
+config = app.config
 
 inc=Inception()
+
+mailonoff=config.get('MAIL_ON_OFF')
+
 
 admin_permission = Permission(RoleNeed('admin'))
 dev_permission = Permission(RoleNeed('dev'))
@@ -156,6 +161,55 @@ def user_srole(id):
         user.srole = 0
     db.session.commit()
     return redirect('user')
+@app.route('/admin_chart/<int:days>')
+@admin_permission.require()
+def admin_chart(days=7):
+    dayrange=[]
+    today = date.today()
+    dayrange.append(str(today))
+    for day in range(1,days):
+        datetmp = today-timedelta(days=day)
+        dayrange.append(str(datetmp))
+    dayrange.sort()
+
+    daycounts=[]
+    for i in range(len(dayrange)):
+        daycount=Work.query.filter(Work.create_time.like(dayrange[i]+'%')).count()
+        daycounts.append(daycount)
+    dayago = today-timedelta(days=days)
+
+    works = db.session.query(Work.status).filter(Work.create_time >= dayago)
+
+    workstatus={u'正常结束':0, u'待人工审核':0, u'自动审核失败':0, u'执行中':0, u'执行异常':0, u'开发人中止':0, u'审核人中止':0, u'管理员中止':0}
+    for work in works:
+        if work.status == 0:
+            workstatus[u'正常结束']+=1
+        elif work.status == 1:
+            workstatus[u'待人工审核']+=1
+        elif work.status == 2:
+            workstatus[u'自动审核失败']+=1
+        elif work.status == 3:
+            workstatus[u'执行中'] += 1
+        elif work.status == 4:
+            workstatus[u'执行异常']+=1
+        elif work.status == 5:
+            workstatus[u'开发人中止']+=1
+        elif work.status == 6:
+            workstatus[u'审核人中止']+=1
+        elif work.status == 7:
+            workstatus[u'管理员中止']+=1
+
+    dev_dist = db.session.query(Work.dev.label('dev'),
+                                func.count(Work.dev).label('count')).filter(Work.create_time >= dayago).group_by(Work.dev)
+    audit_dist = db.session.query(Work.audit.label('audit'),
+                                func.count(Work.dev).label('count')).filter(Work.create_time >= dayago).group_by(Work.audit)
+
+
+    return render_template('admin_chart.html',dayrange=dayrange, daycounts=daycounts, workstatus=workstatus, dev_dist=dev_dist, audit_dist=audit_dist, days=days)
+
+
+
+
 @app.route('/dev_work')
 @dev_permission.require()
 def dev_work():
@@ -202,6 +256,10 @@ def dev_work_create():
 
                 db.session.add(work)
                 db.session.commit()
+
+                if mailonoff == 'ON':
+                    audit=User.query.filter(User.name == work.audit).first()
+                    send_email(u'【inception_web】新工单通知',u'您好，你有一条新的工单（'+work.name+u'），请审核，谢谢！',audit.email)
                 return redirect('dev_work')
             else:
                 flash('inception返回的结果集为空！可能是SQL语句有语法错误!')
@@ -233,6 +291,11 @@ def dev_work_update(id):
                 work.auto_review = jsonResult
                 work.sql_content = sqlContent
                 db.session.commit()
+
+
+                if mailonoff == 'ON':
+                    audit = User.query.filter(User.name == work.audit).first()
+                    send_email(u'【inception_web】修改工单通知', u'您好，你有一条刚修改的工单（' + work.name + u'），请审核，谢谢！', audit.email)
                 return redirect('dev_work')
             else:
                 flash('inception返回的结果集为空！可能是SQL语句有语法错误!')
@@ -333,6 +396,11 @@ def audit_work_assign(id):
         work.srole = 0
         work.audit = form.audit.data
         db.session.commit()
+
+
+        if mailonoff == 'ON':
+            audit=User.query.filter(User.name == work.audit).first()
+            send_email(u'【inception_web】分派工单通知', u'您好，你有一条分派的工单（' + work.name + u'），请审核，谢谢！', audit.email)
         return redirect('audit_work')
 
     return render_template('audit_work_assign.html', form=form, work=work, audits=audits)
@@ -350,6 +418,10 @@ def audit_work_execute(id):
     work.finish_time = datetime.now()
     work.status = finalStatus
     db.session.commit()
+
+    if mailonoff == 'ON':
+        dev = User.query.filter(User.name == work.dev).first()
+        send_email(u'【inception_web】完成工单通知', u'您好，你发起的工单（' + work.name + u'）已完成，请知悉，谢谢！', dev.email)
     return redirect('audit_work')
 @app.route('/audit_work/exportsql/<int:id>')
 @audit_permission.require()
@@ -366,6 +438,51 @@ def audit_work_exportsql(id):
     response = make_response(send_file(tmp_dir + '/backup.sql'))
     response.headers["Content-Disposition"] = "attachment; filename=ex.sql;"
     return response
+@app.route('/audit_chart/<int:days>')
+@audit_permission.require()
+def audit_chart(days=7):
+    dayrange=[]
+    today = date.today()
+    dayrange.append(str(today))
+    for day in range(1,days):
+        datetmp = today-timedelta(days=day)
+        dayrange.append(str(datetmp))
+    dayrange.sort()
+
+    daycounts=[]
+    for i in range(len(dayrange)):
+        daycount=Work.query.filter(Work.audit == current_user.name, Work.create_time.like(dayrange[i]+'%')).count()
+        daycounts.append(daycount)
+    sevendayago = today-timedelta(days=days)
+
+    works = db.session.query(Work.status).filter(Work.audit == current_user.name, Work.create_time >= sevendayago)
+
+    workstatus={u'正常结束':0, u'待人工审核':0, u'自动审核失败':0, u'执行中':0, u'执行异常':0, u'开发人中止':0, u'审核人中止':0, u'管理员中止':0}
+    for work in works:
+        if work.status == 0:
+            workstatus[u'正常结束']+=1
+        elif work.status == 1:
+            workstatus[u'待人工审核']+=1
+        elif work.status == 2:
+            workstatus[u'自动审核失败']+=1
+        elif work.status == 3:
+            workstatus[u'执行中'] += 1
+        elif work.status == 4:
+            workstatus[u'执行异常']+=1
+        elif work.status == 5:
+            workstatus[u'开发人中止']+=1
+        elif work.status == 6:
+            workstatus[u'审核人中止']+=1
+        elif work.status == 7:
+            workstatus[u'管理员中止']+=1
+    from sqlalchemy import func, distinct
+
+    distincts = db.session.query(distinct(Work.dev).label('person'), func.count(distinct(Work.dev)).label('count')).filter(Work.audit == current_user.name, Work.create_time >= sevendayago)
+
+
+
+    return render_template('audit_chart.html',dayrange=dayrange, daycounts=daycounts, workstatus=workstatus, days=days)
+
 
 
 
@@ -388,16 +505,31 @@ def work_stop(id):
         work.status = 5
         work.finish_time = datetime.now()
         db.session.commit()
+        if mailonoff == 'ON':
+            stop_email(work)
         return redirect('dev_work')
     elif current_user.role == 'audit':
         work.status = 6
         work.finish_time = datetime.now()
         db.session.commit()
+        if mailonoff == 'ON':
+            stop_email(work)
         return redirect('audit_work')
     elif current_user.role == 'admin':
         work.status = 7
         work.finish_time = datetime.now()
         db.session.commit()
+        if mailonoff == 'ON':
+            stop_email(work)
+def stop_email(work):
+    dev = User.query.filter(User.name == work.dev).first()
+    audit = User.query.filter(User.name == work.audit).first()
+    send_email(u'【inception_web】中止工单通知', u'您好，你有一条工单（' + work.name + u'）已被'+current_user.name+u'中止，请知悉，谢谢！', dev.email)
+    send_email(u'【inception_web】中止工单通知', u'您好，你有一条工单（' + work.name + u'）已被'+current_user.name+u'中止，请知悉，谢谢！', audit.email)
+
+
+
+
 
 
 

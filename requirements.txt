@@ -1,0 +1,7 @@
+flask==0.12.2
+flask-mail==0.9.1
+flask-sqlalchemy==2.2
+flask-principal==0.4.0
+flask-login==0.4.0
+MySQL-python==1.2.5
+flask-wtf==0.14.2
