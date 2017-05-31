@@ -34,18 +34,26 @@ cd inception_web<br>
 pip install -r requirements.txt<br>
 
 4.启动运行<br>
-测试：
+测试环境：
 chmod +x debug.sh<br>
 ./debug.sh <br>
 
-生产：<br>
-chmod +x start.sh<br>
+生产环境：<br>
+chmod +x start.sh stop.sh<br>
 pip install gunicorn<br>
-./start.sh<br>
+启动：./start.sh<br>
+关闭：./stop.sh<br>
 
-5.访问
+5.访问<br>
 
-http://(部署服务器IP):5000/login
-初始帐号密码：admin/admin
-注：防火墙端口5000需要放开
+http://(部署服务器IP):5000/login<br>
+初始帐号密码：admin/admin<br>
+注：防火墙端口5000需要放开<br>
+
+6.依次添加数据库，开发人员，审核人员，开始工作。
+<br>
+<br>
+-------有更多idea欢迎和我一起交流分享，谢谢！我的QQ：496080199<br>
+
+
 
