@@ -3,34 +3,36 @@
 {% block menu %}
  <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
               <div class="menu_section">
-                <h3>数据库管理</h3>
+
                 <ul class="nav side-menu">
+                  <li><a href="{{ url_for('dashboard') }}"><h3> 首页</h3> </a></li>
+                  <li><a><i class="fa"></i> 数据库管理 <span class="fa fa-chevron-down"></span></a>
                   {% if current_user.role == 'dev' %}
-                  <li><a><i class="fa"></i> 开发人员 <span class="fa fa-chevron-down"></span></a>
-                    <ul class="nav child_menu">
+
+                    <ul class="nav ">
                       <li><a href="{{ url_for('dev_work') }}">我的工单</a></li>
                       <li><a href="{{ url_for('dev_work_create') }}">发起sql工单</a></li>
                       <li><a href="{{ url_for('dev_chart',days=7) }}">工单图表</a></li>
                     </ul>
-                  </li>
                   {% endif %}
+                  </li>
                   {% if current_user.role == 'audit' %}
-                  <li><a><i class="fa"></i> 审核人员 <span class="fa fa-chevron-down"></span></a>
-                    <ul class="nav child_menu">
+
+                    <ul class="nav ">
                       <li><a href="{{ url_for('audit_work') }}">我的工单</a></li>
                       <li><a href="{{ url_for('audit_work_pending') }}">待审核工单</a></li>
                       <li><a href="{{ url_for('audit_chart',days=7) }}">工单图表</a></li>
                     </ul>
-                  </li>
+
                   {% endif %}
                   {% if current_user.role == 'admin' %}
-                  <li><a><i class="fa"></i> 管理人员 <span class="fa fa-chevron-down"></span></a>
-                    <ul class="nav child_menu">
+
+                    <ul class="nav ">
                       <li><a href="{{url_for('mysql_db')}}">MySQL数据库</a></li>
                       <li><a href="{{url_for('user')}}">人员管理</a></li>
                       <li><a href="{{ url_for('admin_chart',days=7) }}">工单图表</a></li>
                     </ul>
-                  </li>
+
                   {% endif %}
 
                 </ul>
@@ -43,6 +45,22 @@
 {% block content %}
  <div class="right_col" role="main">
     <div class="">
+        <div class="x_panel">
+            <h1>使用指引</h1>
+            <div class="x_title">
+
+            </div>
+            <div class="x_content">
+                <h3>欢迎使用inception_web！</h3>
+                <br>
+                <p>本系统是MySQL自动化管理工具，配合Inception使用，基于archer进行二次开发，进行了一些补充优化。要会使用本系统，正确的姿势是先了解MySQL规范。互联网业界有成熟的MySQL设计规范，上线前请给所有人员进行培训，熟悉其中道理。</p>
+                <br>
+                <p><b><a href="{{url_for('static',filename='mysql_db_design_guide.docx')}}">点击下载规范</a></b></p>
+                <br>
+                <br>
+                <p>有更多idea欢迎和我一起交流分享，谢谢！我的QQ：496080199</p>
+            </div>
+        </div>
     </div>
  </div>
 {% endblock %}
