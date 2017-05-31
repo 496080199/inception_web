@@ -56,6 +56,7 @@ http://(部署服务器IP):5000/login<br>
 -------有更多idea欢迎和我一起交流分享，谢谢！我的QQ：496080199<br>
 
 ## 系统截图
-1. 工单展示页：<br/>
-![image]()
+1. 发起sql工单页：<br/>
+![image](https://github.com/496080199/inception_web/raw/master/doc/images/%E5%8F%91%E8%B5%B7sql%E5%B7%A5%E5%8D%95.png)
+2. 
 
