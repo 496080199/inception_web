@@ -12,8 +12,8 @@
 ## 配置文件：
 config.py
 ## 安装配置：
-要求：python2.7
-建议系统环境：CentOS 7/Ubuntun 14+
+要求：python2.7<br>
+建议系统环境：CentOS 7/Ubuntu 14+
 
 1.安装MySQL 5.6+数据库，用于存放系统数据和回滚sql。<br>
 建立数据库和用户：<br>
@@ -34,9 +34,18 @@ cd inception_web<br>
 pip install -r requirements.txt<br>
 
 4.启动运行<br>
-测试：./debug.sh <br>
+测试：
+chmod +x debug.sh<br>
+./debug.sh <br>
 
 生产：<br>
+chmod +x start.sh<br>
 pip install gunicorn<br>
 ./start.sh<br>
+
+5.访问
+
+http://(部署服务器IP):5000/login
+初始帐号密码：admin/admin
+注：防火墙端口5000需要放开
 
