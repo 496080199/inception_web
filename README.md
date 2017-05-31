@@ -18,7 +18,7 @@ config.py
 1.安装MySQL 5.6+数据库，用于存放系统数据和回滚sql。<br>
 建立数据库和用户：<br>
 create database inception_web character set utf8;<br>
-grant all privileges on *.* to inception_web@'%' identified by 'inception_web';<br>
+grant all privileges on \*.\* to inception_web@'%' identified by 'inception_web';<br>
 flush privileges;<br>
 
 2.安装Inception(参考文档：http://mysql-inception.github.io/inception-document/install/）<br>
