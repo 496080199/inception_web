@@ -21,7 +21,7 @@ create database inception_web character set utf8;<br>
 grant all privileges on \*.\* to inception_web@'%' identified by 'inception_web';<br>
 flush privileges;<br>
 
-2.安装Inception(参考文档：http://mysql-inception.github.io/inception-document/install/）<br>
+2.安装Inception(参考文档：http://mysql-inception.github.io/inception-document/install/ ）<br>
 inc.cnf使用之前创建的mysql主机帐号密码<br>
 
 3.下载系统源码<br>
@@ -29,7 +29,7 @@ git clone https://github.com/496080199/inception_web.git<br>
 或使用zip包下载<br>
 
 3.安装python2.7依赖<br>
-安装pip工具，具体网上搜索(下载配置加速可参见https://pypi-mirrors.org/）<br>
+安装pip工具，具体网上搜索(下载配置加速可参见https://pypi-mirrors.org/ ）<br>
 cd inception_web<br>
 pip install -r requirements.txt<br>
 
