@@ -14,7 +14,7 @@ MAIL_PORT=465
 MAIL_USE_TLS=False
 MAIL_USE_SSL=True
 MAIL_USERNAME='cljqqyx@qq.com'
-MAIL_PASSWORD='clj19880729'
+MAIL_PASSWORD='xxx'
 MAIL_DEFAULT_SENDER='"test"<cljqqyx@qq.com>'
 
 
