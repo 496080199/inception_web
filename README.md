@@ -34,7 +34,7 @@ cd inception_web<br>
 pip install -r requirements.txt<br>
 
 4.启动运行<br>
-测试环境：
+测试环境：<br>
 chmod +x debug.sh<br>
 ./debug.sh <br>
 
@@ -54,8 +54,11 @@ http://(部署服务器IP):5000/login<br>
 <br>
 <br>
 -------有更多idea欢迎和我一起交流分享，谢谢！我的QQ：496080199<br>
-
-## 系统截图
+<br>
+设计原理来源于archer,请大家多关注<br>
+https://github.com/jly8866/archer<br>
+<br>
+## 系统截图:
 1. 发起sql工单页：<br/>
 ![image](https://github.com/496080199/inception_web/raw/master/doc/images/%E5%8F%91%E8%B5%B7sql%E5%B7%A5%E5%8D%95.png)
 2. 工单图表页：<br/>
