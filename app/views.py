@@ -1,19 +1,17 @@
 # coding: utf-8
 from app import app, db
-from flask import render_template, redirect, current_app, g, session, request, flash, make_response, send_file
+from flask import render_template, current_app, g, session, request, flash, make_response, send_file
 from flask_login import current_user, login_user, logout_user , login_required
 from app.form import *
-from app.models import *
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_principal import Identity, AnonymousIdentity, identity_changed, Permission, RoleNeed
-from datetime import datetime, date, timedelta
-import json, re, os
-from app.inception import Inception
+from datetime import date, timedelta
+import  os
+
 from sqlalchemy import func
-from app.email import *
+from app.utils import *
 config = app.config
 
-inc=Inception()
 
 mailonoff=config.get('MAIL_ON_OFF')
 
@@ -240,7 +238,7 @@ def dev_work_create():
             work.srole = audit.srole
             work.sql_content = sqlContent
 
-            result = inc.sqlautoReview(sqlContent, dbConfig, isBackup)
+            result = sqlautoReview(sqlContent, dbConfig, isBackup)
             if result or len(result) != 0:
                 jsonResult = json.dumps(result)
                 work.status = 1
@@ -277,7 +275,7 @@ def dev_work_update(id):
     if form.validate_on_submit():
         sqlContent = form.sql_content.data.rstrip()
         if sqlContent[-1] == ";":
-            result = inc.sqlautoReview(sqlContent, work.db_config, work.backup)
+            result = sqlautoReview(sqlContent, work.db_config, work.backup)
             if result or len(result) != 0:
                 jsonResult = json.dumps(result)
                 work.status = 1
@@ -327,7 +325,7 @@ def dev_work_check():
         finalResult['status'] = 2
         finalResult['msg'] = 'SQL语句结尾没有以;结尾，请重新修改并提交！'
         return json.dumps(finalResult)
-    result = inc.sqlautoReview(sqlContent, dbConfig)
+    result = sqlautoReview(sqlContent, dbConfig)
     if result is None or len(result) == 0:
         finalResult['status'] = 3
         finalResult['msg'] = 'inception返回的结果集为空！可能是SQL语句有语法错误'
@@ -407,26 +405,23 @@ def audit_work_assign(id):
 @app.route('/audit_work/execute/<int:id>')
 @audit_permission.require()
 def audit_work_execute(id):
-    work = Work.query.filter(Work.audit == current_user.name, Work.id == id).first()
-    work.status = 3
-    work.man_review_time = datetime.now()
-    db.session.commit()
 
-    (finalStatus, finalList)=inc.executeFinal(work)
-    jsonResult = json.dumps(finalList)
-    work.execute_result = jsonResult
-    work.finish_time = datetime.now()
-    work.status = finalStatus
-    db.session.commit()
+
+    t=Thread(target=executeFinal,args=(id,))
+    t.start()
 
     if mailonoff == 'ON':
+        work = Work.query.filter(Work.id == id).first()
         dev = User.query.filter(User.name == work.dev).first()
-        send_email(u'【inception_web】完成工单通知', u'您好，你发起的工单（' + work.name + u'）已完成，请知悉，谢谢！', dev.email)
+        send_email(u'【inception_web】完成工单通知', u'您好，你发起的工单（' + work.name + u'）已执行，请稍后查看结果，谢谢！', dev.email)
+
+
     return redirect('audit_work')
 @app.route('/audit_work/exportsql/<int:id>')
 @audit_permission.require()
 def audit_work_exportsql(id):
-    listSqlBak = inc.getRollbackSqlList(id)
+    #listSqlBak = inc.getRollbackSqlList(id)
+    listSqlBak = getRollbackSqlList(id)
     base_dir = os.path.dirname(__file__)
     tmp_dir = base_dir+'/temp'
     if not os.path.exists(tmp_dir):
@@ -477,7 +472,6 @@ def audit_chart(days=7):
             workstatus[u'管理员中止']+=1
     from sqlalchemy import func, distinct
 
-    distincts = db.session.query(distinct(Work.dev).label('person'), func.count(distinct(Work.dev)).label('count')).filter(Work.audit == current_user.name, Work.create_time >= sevendayago)
 
 
 
