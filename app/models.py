@@ -43,15 +43,15 @@ class Work(db.Model):
     dev = db.Column(db.String(64))
     audit = db.Column(db.String(64))
     srole = db.Column(db.Integer, default=0)
-    sql_content = db.Column(db.Text)
+    sql_content = db.Column(db.TEXT(16777215))
     db_config = db.Column(db.String(64))
     backup = db.Column(db.Boolean, default=True)
     status = db.Column(db.Integer, nullable=False)
     create_time = db.Column(db.DateTime, default=datetime.now())
     finish_time = db.Column(db.DateTime)
     man_review_time = db.Column(db.DateTime)
-    auto_review = db.Column(db.Text)
-    execute_result = db.Column(db.Text)
+    auto_review = db.Column(db.TEXT(16777215))
+    execute_result = db.Column(db.TEXT(16777215))
 
 
 
