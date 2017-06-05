@@ -33,7 +33,11 @@ git clone https://github.com/496080199/inception_web.git<br>
 cd inception_web<br>
 pip install -r requirements.txt<br>
 
-4.启动运行<br>
+4.配置修改<br>
+复制config_example.py为config.py<br>
+根据自己的环境进行相应修改config.py中参数<br>
+
+5.启动运行<br>
 测试环境：<br>
 chmod +x debug.sh<br>
 ./debug.sh <br>
@@ -44,13 +48,13 @@ pip install gunicorn<br>
 启动：./start.sh<br>
 关闭：./stop.sh<br>
 
-5.访问<br>
+6.访问<br>
 
 http://(部署服务器IP):5000/login<br>
 初始帐号密码：admin/admin<br>
 注：防火墙端口5000需要放开<br>
 
-6.依次添加数据库，开发人员，审核人员，开始工作。
+7.依次添加数据库，开发人员，审核人员，开始工作。
 <br>
 <br>
 -------有更多idea欢迎和我一起交流分享，谢谢！我的QQ：496080199<br>
