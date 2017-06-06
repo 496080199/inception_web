@@ -24,14 +24,14 @@
 
                       <tbody>
                       {% for dbconfig in dbconfigs %}
-
+                          <tr>
                           <td>{{ dbconfig.name }}</td>
                           <td><a href="{{ url_for('view_slowlog', dbid=dbconfig.id,t=1) }}">1小时</a></td>
                           <td><a href="{{ url_for('view_slowlog', dbid=dbconfig.id,t=3) }}">3小时</a></td>
                           <td><a href="{{ url_for('view_slowlog', dbid=dbconfig.id,t=6) }}">6小时</a></td>
                           <td><a href="{{ url_for('view_slowlog', dbid=dbconfig.id,t=12) }}">12小时</a></td>
                           <td><a href="{{ url_for('view_slowlog', dbid=dbconfig.id,t=24) }}">24小时</a></td>
-
+                          </tr>
                       {% endfor %}
 
                       </tbody>
