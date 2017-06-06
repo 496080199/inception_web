@@ -204,6 +204,21 @@ def admin_chart(days=7):
 
 
     return render_template('admin_chart.html',dayrange=dayrange, daycounts=daycounts, workstatus=workstatus, dev_dist=dev_dist, audit_dist=audit_dist, days=days)
+@app.route('/slowlog')
+@login_required
+def slowlog():
+    dbconfigs = DbConfig.query.all()
+
+    return render_template('slowlog.html', dbconfigs=dbconfigs)
+@app.route('/view_slowlog/<int:dbid>/<int:t>')
+@login_required
+def view_slowlog(dbid, t=1):
+    slowloglist=getSlowLogList(dbid, t)
+    dbconfig = DbConfig.query.get(dbid)
+
+    return render_template('view_slowlog.html', slowloglist=slowloglist, dbconfig=dbconfig)
+
+
 
 
 

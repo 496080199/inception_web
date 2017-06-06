@@ -11,6 +11,7 @@ from app import app, db, mail
 from flask import redirect
 from flask_mail import Message
 from threading import Thread
+from datetime import date, timedelta
 
 config = app.config
 
@@ -158,6 +159,17 @@ def getRollbackSqlList(workId):
             for rownum in range(len(listBackup)):
                 listBackupSql.append(listBackup[rownum][0])
     return listBackupSql
+
+def getSlowLogList(dbId, hour):
+    dbDt=(datetime.now()-timedelta(hours=hour)).strftime('%Y-%m-%d %H:%M:%S')
+    dbConfig=DbConfig.query.filter(DbConfig.id == dbId).first()
+
+    sql="select sql_text,count(sql_text) c from mysql.slow_log where start_time >= '%s' group by sql_text order by c asc limit 30" % (dbDt)
+    slowlogList=fetchall(sql, dbConfig.host, dbConfig.port,
+                         dbConfig.user, dbConfig.password, '')
+    return slowlogList
+
+
 
 
 def fetchall(sql, paramHost, paramPort, paramUser, paramPasswd, paramDb):

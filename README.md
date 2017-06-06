@@ -9,6 +9,7 @@
 - __用户权限配置__
 - __工单查询管理__
 - __工单邮件通知__
+- __查看慢查询__
 ## 配置文件：
 config.py
 ## 安装配置：
@@ -36,6 +37,7 @@ pip install -r requirements.txt<br>
 4.配置修改<br>
 复制config_example.py为config.py<br>
 根据自己的环境进行相应修改config.py中参数<br>
+注：查看慢查询需设置mysql的参数log_output=table将慢查询记录输出到mysql库的slow_log表中
 
 5.启动运行<br>
 测试环境：<br>
