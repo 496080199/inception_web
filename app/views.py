@@ -1,4 +1,4 @@
-# coding: utf-8
+#encoding:utf-8
 from app import app, db
 from flask import render_template, current_app, g, session, request, flash, make_response, send_file
 from flask_login import current_user, login_user, logout_user , login_required
@@ -13,7 +13,6 @@ from app.utils import *
 config = app.config
 
 
-mailonoff=config.get('MAIL_ON_OFF')
 
 
 admin_permission = Permission(RoleNeed('admin'))
@@ -81,7 +80,8 @@ def mysql_db_create():
         dbconfig.host = form.host.data
         dbconfig.port = form.port.data
         dbconfig.user = form.user.data
-        dbconfig.password = form.password.data
+        aes_pass = base64.b64encode(form.password.data)
+        dbconfig.password = aes_pass
         db.session.add(dbconfig)
         db.session.commit()
         return redirect('mysql_db')
@@ -97,7 +97,8 @@ def mysql_db_update(id):
         dbconfig.port = form.port.data
         dbconfig.user = form.user.data
         if form.password.data is not None:
-            dbconfig.password = form.password.data
+            aes_pass = base64.b64encode(form.password.data)
+            dbconfig.password = aes_pass
         dbconfig.update_time = datetime.now()
         db.session.commit()
         return redirect('mysql_db')

@@ -12,6 +12,8 @@ from flask import redirect
 from flask_mail import Message
 from threading import Thread
 from datetime import date, timedelta
+import base64
+
 
 config = app.config
 
@@ -24,6 +26,7 @@ inception_remote_backup_host = config.get('INCEPTION_REMOTE_BACKUP_HOST')
 inception_remote_backup_port = int(config.get('INCEPTION_REMOTE_BACKUP_PORT'))
 inception_remote_backup_user = config.get('INCEPTION_REMOTE_BACKUP_USER')
 inception_remote_backup_password = config.get('INCEPTION_REMOTE_BACKUP_PASSWORD')
+
 
 
 def criticalDDL(sqlContent):
@@ -51,7 +54,7 @@ def sqlautoReview(sqlContent, dbConfigName, isBackup=False):
     dbHost = dbConfig.host
     dbPort = dbConfig.port
     dbUser = dbConfig.user
-    dbPassword = dbConfig.password
+    dbPassword = base64.b64decode(dbConfig.password)
 
     # 这里无需判断字符串是否以；结尾，直接抛给inception enable check即可。
     # if sqlContent[-1] != ";":
@@ -89,7 +92,7 @@ def executeFinal(id):
     dbHost = dbConfig.host
     dbPort = dbConfig.port
     dbUser = dbConfig.user
-    dbPassword = dbConfig.password
+    dbPassword = base64.b64decode(dbConfig.password)
 
     strBackup = ""
     if work.backup == True:
@@ -104,6 +107,7 @@ def executeFinal(id):
              inception_magic_commit;" % (dbUser, dbPassword, dbHost, str(dbPort), work.sql_content)
     splitResult = fetchall(sqlSplit, inception_host, inception_port, '', '', '')
     tmpList = []
+
     # 对于split好的结果，再次交给inception执行.这里无需保持在长连接里执行，短连接即可.
     for splitRow in splitResult:
         sqlTmp = splitRow[1]
@@ -112,8 +116,8 @@ def executeFinal(id):
                     %s\
                     inception_magic_commit;" % (dbUser, dbPassword, dbHost, str(dbPort), strBackup, sqlTmp)
 
-        executeResult = fetchall(sqlExecute, inception_host, inception_port, '', '', '')
-        tmpList.append(executeResult)
+    executeResult = fetchall(sqlExecute, inception_host, inception_port, '', '', '')
+    tmpList.append(executeResult)
 
     # 二次加工一下，目的是为了和sqlautoReview()函数的return保持格式一致，便于在detail页面渲染.
     finalStatus = 0
@@ -166,7 +170,7 @@ def getSlowLogList(dbId, hour):
 
     sql="select sql_text,count(sql_text) c from mysql.slow_log where start_time >= '%s' group by sql_text order by c asc limit 30" % (dbDt)
     slowlogList=fetchall(sql, dbConfig.host, dbConfig.port,
-                         dbConfig.user, dbConfig.password, '')
+                         dbConfig.user, base64.b64decode(dbConfig.password), '')
     return slowlogList
 
 
@@ -206,3 +210,4 @@ def send_email(subject, body, receiver):
     thr = Thread(target=send_async_email, args=[app, msg])
     thr.start()
     return u'发送成功'
+
