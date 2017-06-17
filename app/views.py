@@ -219,7 +219,27 @@ def view_slowlog(dbid, t=1):
 
     return render_template('view_slowlog.html', slowloglist=slowloglist, dbconfig=dbconfig)
 
+@app.route('/dbreport/<int:id>', methods = ['GET', 'POST'])
+@admin_permission.require()
+def dbreport(id):
+    dbconfig = DbConfig.query.get(id)
+    dbreports = Report.query.filter(Report.db_name == dbconfig.name)
+    form = ReportForm()
+    if form.validate_on_submit():
+        report = Report()
+        report.db_name = dbconfig.name
+        report.mem = form.mem.data
+        report.report_content = getdbReport(id, form.mem.data)
+        db.session.add(report)
+        db.session.commit()
+    return render_template('dbreport.html', form=form, dbconfig=dbconfig, dbreports=dbreports)
 
+@app.route('/dbreport_view/<int:id>')
+@admin_permission.require()
+def dbreport_view(id):
+    dbreport = Report.query.get(id)
+
+    return render_template('dbreport_view.html', dbreport=dbreport)
 
 
 

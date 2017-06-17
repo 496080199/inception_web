@@ -52,6 +52,12 @@ class Work(db.Model):
     man_review_time = db.Column(db.DateTime)
     auto_review = db.Column(db.TEXT(16777215))
     execute_result = db.Column(db.TEXT(16777215))
+class Report(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    db_name = db.Column(db.String(64))
+    mem = db.Column(db.Integer)
+    create_time = db.Column(db.DateTime, default=datetime.now())
+    report_content = db.Column(db.TEXT(16777215))
 
 
 

@@ -30,3 +30,5 @@ class WorkForm(FlaskForm):
     sql_content = TextAreaField(u'sql内容', validators=[DataRequired()])
 class WorkAssignForm(FlaskForm):
     audit = StringField(u'审核人', validators=[DataRequired()])
+class ReportForm(FlaskForm):
+    mem = StringField(u'内存大小', validators=[DataRequired()])

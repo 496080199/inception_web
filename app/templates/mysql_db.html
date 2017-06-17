@@ -39,7 +39,7 @@
                           <td>{{ dbconfig.user }}</td>
                           <td>{{ dbconfig.create_time }}</td>
                           <td>{{ dbconfig.update_time }}</td>
-                          <td><button type="button" class="btn btn-info btn-sm" onclick="{location.href='{{ url_for('mysql_db_update',id=dbconfig.id) }}'}">修改</button><button type="button" class="btn btn-danger btn-sm" onclick="javascript:if (confirm('确定要删除?')) location.href='{{ url_for('mysql_db_delete',id=dbconfig.id) }}';">删除</button></td>
+                          <td><button type="button" class="btn btn-info btn-sm" onclick="{location.href='{{ url_for('dbreport',id=dbconfig.id) }}'}">配置报告</button>&nbsp;&nbsp;<button type="button" class="btn btn-info btn-sm" onclick="{location.href='{{ url_for('mysql_db_update',id=dbconfig.id) }}'}">修改</button><button type="button" class="btn btn-danger btn-sm" onclick="javascript:if (confirm('确定要删除?')) location.href='{{ url_for('mysql_db_delete',id=dbconfig.id) }}';">删除</button></td>
                         </tr>
                       {% endfor %}
 

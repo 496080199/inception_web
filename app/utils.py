@@ -1,6 +1,6 @@
 # -*-coding: utf-8-*-
 
-import re, sys, json
+import os, re, sys, json, subprocess
 import MySQLdb
 
 reload(sys)
@@ -172,6 +172,27 @@ def getSlowLogList(dbId, hour):
     slowlogList=fetchall(sql, dbConfig.host, dbConfig.port,
                          dbConfig.user, base64.b64decode(dbConfig.password), '')
     return slowlogList
+
+def getdbReport(dbId, mem):
+    dbConfig = DbConfig.query.get(dbId)
+    base_dir = os.path.dirname(__file__)
+    p = subprocess.Popen('perl '+base_dir+'/mysqltuner.pl --host '+str(dbConfig.host)+' --user '+str(dbConfig.user)+' --pass '+str(base64.b64decode(dbConfig.password))+' --port '+str(dbConfig.port)+' --forcemem '+str(mem), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE, shell=True)
+    stdout, stderr = p.communicate()
+    dbReport=''
+    if stdout:
+        stdout = stdout.replace('[\x1b[0;34m', '[')
+        stdout = stdout.replace('\x1b[0m]', ']')
+        stdout = stdout.replace('[\x1b[0;32m', '[')
+        stdout = stdout.replace('[\x1b[0;31m', '[')
+        stdout = stdout.replace('\x1b[0;32m', ' ')
+        stdout = stdout.replace('\x1b[0m\x1b[0;32m', ' ')
+        stdout = stdout.replace('\x1b[0m', '')
+        stdout = stdout.replace('\x1b[0;31m', '')
+        dbReport = stdout
+    else:
+        print u'错误：'+stderr
+    return dbReport
 
 
 
