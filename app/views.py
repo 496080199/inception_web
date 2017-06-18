@@ -1,6 +1,6 @@
 #encoding:utf-8
 from app import app, db
-from flask import render_template, current_app, g, session, request, flash, make_response, send_file
+from flask import render_template, current_app, g, session, request, flash, make_response, send_file, url_for
 from flask_login import current_user, login_user, logout_user , login_required
 from app.form import *
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -240,6 +240,15 @@ def dbreport_view(id):
     dbreport = Report.query.get(id)
 
     return render_template('dbreport_view.html', dbreport=dbreport)
+
+@app.route('/dbreport_delete/<int:dbid>/<int:id>')
+@admin_permission.require()
+def dbreport_delete(dbid, id):
+    dbreport = Report.query.get(id)
+    db.session.delete(dbreport)
+    db.session.commit()
+    return redirect(url_for('dbreport', id=dbid))
+
 
 
 

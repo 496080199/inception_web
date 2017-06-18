@@ -7,14 +7,14 @@
             <div class="col-md-12 col-sm-12 col-xs-12">
                 <div class="x_panel">
                   <div class="x_title">
-                        <form id="demo-form2" data-parsley-validate  method="post" action="{{ url_for('dbreport', id=dbconfig.id) }}">
+                        <form id="demo-form2" data-parsley-validate  method="post" action="{{ url_for('dbreport', id=dbconfig.id) }}" onsubmit="javascript:if (confirm('确定要生成新报告?')) { return true } else { return false }">
                     <h2>{{ dbconfig.name }}数据库报告</h2>
 
 
 
                        {{ form.hidden_tag() }}
                       <ul class="nav navbar-middle panel_toolbox">
-                          <li><label>内存：</label><input type="text" id="{{ form.mem.name }}" name="{{ form.mem.name }}" class="form-group-sm" placeholder="请输入数据库内存大小" required="required"/>MB&nbsp;&nbsp;<button type="submit" class="btn btn-success btn-sm" >新建报告</button></li>
+                          <li><label>内存：</label><input type="text" id="{{ form.mem.name }}" name="{{ form.mem.name }}" class="form-group-sm" placeholder="请输入数据库内存大小" required="required"/>MB&nbsp;&nbsp;<button type="submit" class="btn btn-success btn-sm" >生成报告</button></li>
                       </ul>
                       </form>
                     <div class="clearfix"></div>
@@ -36,8 +36,8 @@
                       {% for dbreport in dbreports %}
                         <tr>
                           <td>{{ dbreport.create_time }}</td>
-                          <td>{{ dbreport.mem }}</td>
-                          <td><button type="button" class="btn btn-info btn-sm" onclick="{location.href='{{ url_for('dbreport_view',id=dbreport.id) }}'}">查看</button></td>
+                          <td>{{ dbreport.mem }}&nbsp;MB</td>
+                          <td><button type="button" class="btn btn-info btn-sm" onclick="{location.href='{{ url_for('dbreport_view',id=dbreport.id) }}'}">查看</button><button type="button" class="btn btn-danger btn-sm" onclick="javascript:if (confirm('确定要删除?')) location.href='{{ url_for('dbreport_delete',dbid=dbconfig.id,id=dbreport.id) }}';">删除</button></td>
                         </tr>
                       {% endfor %}
 
