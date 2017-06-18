@@ -80,4 +80,7 @@ https://github.com/jly8866/archer<br>
 ![image](https://github.com/496080199/inception_web/raw/master/doc/images/%E7%99%BB%E9%99%86%E9%A1%B5.png)
 7. 管理员主页：<br/>
 ![image](https://github.com/496080199/inception_web/raw/master/doc/images/%E7%AE%A1%E7%90%86%E5%91%98%E4%B8%BB%E9%A1%B5.png)
+7. mysqltuner配置分析报告：<br/>
+![image](https://github.com/496080199/inception_web/raw/master/doc/images/%E9%85%8D%E7%BD%AE%E6%8A%A5%E5%91%8A.png)
+
 
