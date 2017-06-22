@@ -3,6 +3,11 @@ from app import db
 from datetime import datetime
 
 
+dbs = db.Table('dbs',
+        db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+        db.Column('dbconfig_id', db.Integer, db.ForeignKey('dbconfig.id'))
+    )
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(64), unique = True)
@@ -10,6 +15,7 @@ class User(db.Model):
     role = db.Column(db.String(120))
     srole =db.Column(db.Integer, default=0)
     hash_pass = db.Column(db.String(200))
+    dbs = db.relationship('Dbconfig', secondary=dbs, backref=db.backref('users', lazy='dynamic'))
 
     def is_authenticated(self):
         return False
@@ -28,7 +34,7 @@ class User(db.Model):
 
     def __repr__(self):
         return '<User %r>' % (self.name)
-class DbConfig(db.Model):
+class Dbconfig(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique = True)
     host = db.Column(db.String(200),)
@@ -37,6 +43,9 @@ class DbConfig(db.Model):
     password = db.Column(db.String(300))
     create_time = db.Column(db.DateTime, default=datetime.now())
     update_time = db.Column(db.DateTime, default=datetime.now())
+
+
+
 class Work(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), unique=True)

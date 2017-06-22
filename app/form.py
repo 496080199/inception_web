@@ -1,7 +1,7 @@
 # coding: utf-8
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, IntegerField, PasswordField, BooleanField, TextAreaField
+from wtforms import StringField, IntegerField, PasswordField, BooleanField, TextAreaField, SelectField
 from wtforms.validators import DataRequired
 
 class LoginForm(FlaskForm):
@@ -22,6 +22,8 @@ class UserForm(FlaskForm):
     passwd = PasswordField(u'密码', validators=[DataRequired()])
     role = StringField(u'角色', validators=[DataRequired()])
     email = StringField(u'邮箱', validators=[DataRequired()])
+class UserDbForm(FlaskForm):
+    db = IntegerField(u'数据库', validators=[DataRequired()])
 class WorkForm(FlaskForm):
     name = StringField(u'工单名', validators=[DataRequired()])
     db_config = StringField(u'数据库', validators=[DataRequired()])

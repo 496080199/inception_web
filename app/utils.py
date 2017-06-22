@@ -48,7 +48,7 @@ def sqlautoReview(sqlContent, dbConfigName, isBackup=False):
     '''
     将sql交给inception进行自动审核，并返回审核结果。
     '''
-    dbConfig = DbConfig.query.filter(DbConfig.name == dbConfigName).first()
+    dbConfig = Dbconfig.query.filter(Dbconfig.name == dbConfigName).first()
     if not dbConfig:
         print("Error: 数据库配置不存在")
     dbHost = dbConfig.host
@@ -86,7 +86,7 @@ def executeFinal(id):
     work.status = 3
     work.man_review_time = datetime.now()
     db.session.commit()
-    dbConfig = DbConfig.query.filter(DbConfig.name == work.db_config).first()
+    dbConfig = Dbconfig.query.filter(Dbconfig.name == work.db_config).first()
     if not dbConfig:
         print("Error: 数据库配置不存在")
     dbHost = dbConfig.host
@@ -166,7 +166,7 @@ def getRollbackSqlList(workId):
 
 def getSlowLogList(dbId, hour):
     dbDt=(datetime.now()-timedelta(hours=hour)).strftime('%Y-%m-%d %H:%M:%S')
-    dbConfig=DbConfig.query.filter(DbConfig.id == dbId).first()
+    dbConfig=Dbconfig.query.filter(Dbconfig.id == dbId).first()
 
     sql="select sql_text,count(sql_text) c from mysql.slow_log where start_time >= '%s' group by sql_text order by c asc limit 30" % (dbDt)
     slowlogList=fetchall(sql, dbConfig.host, dbConfig.port,
@@ -174,7 +174,7 @@ def getSlowLogList(dbId, hour):
     return slowlogList
 
 def getdbReport(dbId, mem):
-    dbConfig = DbConfig.query.get(dbId)
+    dbConfig = Dbconfig.query.get(dbId)
     base_dir = os.path.dirname(__file__)
     p = subprocess.Popen('perl '+base_dir+'/mysqltuner.pl --host '+str(dbConfig.host)+' --user '+str(dbConfig.user)+' --pass '+str(base64.b64decode(dbConfig.password))+' --port '+str(dbConfig.port)+' --forcemem '+str(mem), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE, shell=True)

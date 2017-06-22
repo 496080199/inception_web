@@ -35,6 +35,7 @@
                           <td>{{ user.email }}</td>
                           <td>
                               {% if user.role == 'audit' and user.srole == 0 %}<button type="button" class="btn btn-warning btn-sm" onclick="{location.href='{{ url_for('user_srole',id=user.id) }}'}">设置为副审核</button>{% elif user.role == 'audit' and user.srole == 1 %}<button type="button" class="btn btn-warning btn-sm" onclick="{location.href='{{ url_for('user_srole',id=user.id) }}'}">设置为主审核</button>{% endif %}
+                              {% if user.role == 'dev' %}<button type="button" class="btn btn-primary btn-sm" onclick="{location.href='{{ url_for('user_db_alloc',id=user.id) }}'}">分配数据库</button>{% endif %}
                               <button type="button" class="btn btn-info btn-sm" onclick="{location.href='{{ url_for('user_update',id=user.id) }}'}">修改</button>
                               <button type="button" class="btn btn-danger btn-sm" onclick="javascript:if (confirm('确定要删除?')) location.href='{{ url_for('user_delete',id=user.id) }}';">删除</button></td>
                         </tr>

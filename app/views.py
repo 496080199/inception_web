@@ -67,7 +67,7 @@ def passwd():
 @app.route('/mysql_db')
 @admin_permission.require()
 def mysql_db():
-    dbconfigs=DbConfig.query.all()
+    dbconfigs=Dbconfig.query.all()
 
     return render_template('mysql_db.html',dbconfigs=dbconfigs)
 @app.route('/mysql_db/create', methods = ['GET', 'POST'])
@@ -75,7 +75,7 @@ def mysql_db():
 def mysql_db_create():
     form = MysqlDbForm()
     if form.validate_on_submit():
-        dbconfig = DbConfig()
+        dbconfig = Dbconfig()
         dbconfig.name = form.name.data
         dbconfig.host = form.host.data
         dbconfig.port = form.port.data
@@ -89,7 +89,7 @@ def mysql_db_create():
 @app.route('/mysql_db/update/<int:id>', methods = ['GET', 'POST'])
 @admin_permission.require()
 def mysql_db_update(id):
-    dbconfig=DbConfig.query.get(id)
+    dbconfig=Dbconfig.query.get(id)
     form = MysqlDbForm()
     if form.validate_on_submit():
         dbconfig.name = form.name.data
@@ -107,7 +107,7 @@ def mysql_db_update(id):
 @app.route('/mysql_db/delete/<int:id>')
 @admin_permission.require()
 def mysql_db_delete(id):
-    dbconfig = DbConfig.query.get(id)
+    dbconfig = Dbconfig.query.get(id)
     db.session.delete(dbconfig)
     db.session.commit()
     return redirect('mysql_db')
@@ -160,6 +160,34 @@ def user_srole(id):
         user.srole = 0
     db.session.commit()
     return redirect('user')
+
+@app.route('/user/db_alloc/<int:id>', methods = ['GET', 'POST'])
+@admin_permission.require()
+def user_db_alloc(id):
+    user=User.query.get(id)
+    userdbconfigs=user.dbs
+    alldbconfigs=Dbconfig.query.all()
+    for userdbconfig in userdbconfigs:
+        if userdbconfig in alldbconfigs:
+            alldbconfigs.remove(userdbconfig)
+    form = UserDbForm()
+    if form.validate_on_submit():
+        dbconfig=Dbconfig.query.get(form.db.data)
+        user.dbs.append(dbconfig)
+        db.session.commit()
+        return redirect(url_for('user_db_alloc', id=id))
+
+    return render_template('user_db_alloc.html', form=form, user=user, userdbconfigs=userdbconfigs, alldbconfigs=alldbconfigs)
+@app.route('/user/db_delete/<int:userid><int:dbid>')
+@admin_permission.require()
+def user_db_delete(userid,dbid):
+    user = User.query.get(userid)
+    dbconfig = Dbconfig.query.get(dbid)
+    user.dbs.remove(dbconfig)
+    db.session.commit()
+    return redirect(url_for('user_db_alloc', id=userid))
+
+
 @app.route('/admin_chart/<int:days>')
 @admin_permission.require()
 def admin_chart(days=7):
@@ -208,21 +236,21 @@ def admin_chart(days=7):
 @app.route('/slowlog')
 @login_required
 def slowlog():
-    dbconfigs = DbConfig.query.all()
+    dbconfigs = Dbconfig.query.all()
 
     return render_template('slowlog.html', dbconfigs=dbconfigs)
 @app.route('/view_slowlog/<int:dbid>/<int:t>')
 @login_required
 def view_slowlog(dbid, t=1):
     slowloglist=getSlowLogList(dbid, t)
-    dbconfig = DbConfig.query.get(dbid)
+    dbconfig = Dbconfig.query.get(dbid)
 
     return render_template('view_slowlog.html', slowloglist=slowloglist, dbconfig=dbconfig)
 
 @app.route('/dbreport/<int:id>', methods = ['GET', 'POST'])
 @admin_permission.require()
 def dbreport(id):
-    dbconfig = DbConfig.query.get(id)
+    dbconfig = Dbconfig.query.get(id)
     dbreports = Report.query.filter(Report.db_name == dbconfig.name)
     form = ReportForm()
     if form.validate_on_submit():
@@ -261,7 +289,7 @@ def dev_work():
 @app.route('/dev_work/create', methods = ['GET', 'POST'])
 @dev_permission.require()
 def dev_work_create():
-    db_configs = DbConfig.query.all()
+    db_configs = current_user.dbs
     if config.get('AUDIT_SROLE_ON_OFF') == 'ON':
         audits = User.query.filter(User.role == 'audit', User.srole == 1)
     else:
@@ -314,7 +342,7 @@ def dev_work_create():
 @dev_permission.require()
 def dev_work_update(id):
     work=Work.query.get(id)
-    db_configs = DbConfig.query.all()
+    db_configs = current_user.dbs
     audits = User.query.filter(User.role == 'audit')
     form = WorkForm()
     if form.validate_on_submit():
@@ -377,6 +405,7 @@ def dev_work_check():
         return json.dumps(finalResult)
     finalResult['data'] = result
     return json.dumps(finalResult)
+
 @app.route('/dev_chart/<int:days>')
 @dev_permission.require()
 def dev_chart(days=7):
