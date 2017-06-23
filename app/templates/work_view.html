@@ -55,8 +55,8 @@
                                 <thead>
                                     <tr>
                                         <td>ID</td>
-                                        <th>sql语句</th>
-                                        <th>自动审核结果</th>
+                                        <th class='col-md-3 col-sm-3 col-xs-12'>sql语句</th>
+                                        <th class='col-md-5 col-sm-5 col-xs-12'>自动审核结果</th>
                                         <th>扫描影响行数</th>
                                         <th>执行耗时</th>
                                         <th>执行状态</th>
@@ -68,8 +68,17 @@
                                     <tr>
 
                                         <td>{{ row.0 }}</td>
-                                        <td>{{ row.5 }}</td>
-                                        <td>{{ row.4 }}</td>
+                                        <td>
+                                            {% for t in row.5.split('\r\n') %}
+                                                {{ t }}<br>
+                                            {% endfor %}
+                                        </td>
+
+                                        <td>
+                                            {% for t in row.4.split('\n') %}
+                                                {{ t }}<br>
+                                            {% endfor %}
+                                         </td>
                                         <td>{{ row.6 }}</td>
                                         <td>{{ row.9 }}</td>
                                         <td>{{ row.3 }}</td>

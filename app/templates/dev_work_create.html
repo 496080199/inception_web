@@ -129,10 +129,13 @@
 		success: function (data) {
            if (data.status == 0) {
                var result = data.data;
-               var finalHtml ="<div id='result' class='col-md-12 col-sm-12 col-xs-12'><div class='x_panel'><div class='x_content'><table class='table'><thead><tr><th>sql语句</th><th>自动审核结果</th></tr></thead><tbody>";
+               var finalHtml ="<div id='result' class='col-md-12 col-sm-12 col-xs-12'><div class='x_panel'><div class='x_content'><table class='table'><thead><tr><th class='col-md-5 col-sm-5 col-xs-12'>sql语句</th><th class='col-md-7 col-sm-7 col-xs-12'>自动审核结果</th></tr></thead><tbody>";
                for (var i=0; i<result.length; i++) {
                    if (result[i][4] != "None") {
-                       finalHtml+="<tr><td><font color='#FF0000'>"+result[i][5]+"</font></td><td><font color='#FF0000'>"+result[i][4]+"</font></td></tr>"
+                       finalresult=result[i][4].replace(/\n/g, "<br>")
+                       finalsql=result[i][5].replace(/\r\n/g, "<br>nbsp;nbsp;nbsp;nbsp;")
+                       finalsql=finalsql.replace(/,/g, ",<br>")
+                       finalHtml+="<tr><td><font color='#FF0000'>"+finalsql+"</font></td><td><font color='#FF0000'>"+finalresult+"</font></td></tr>"
                    } else {
                        finalHtml+="<tr><td><font color='#00FF00'>"+result[i][5]+"</font></td><td><font color='#00FF00'>"+result[i][4]+"</font></td></tr>"
                    }
