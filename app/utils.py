@@ -1,6 +1,6 @@
 # -*-coding: utf-8-*-
 
-import os, re, sys, json, subprocess
+import os, re, sys, json, subprocess,time, stat
 import MySQLdb
 
 reload(sys)
@@ -14,7 +14,7 @@ from threading import Thread
 from datetime import date, timedelta
 import base64
 
-
+base_dir = os.path.dirname(__file__)
 config = app.config
 
 mailonoff=config.get('MAIL_ON_OFF')
@@ -175,7 +175,6 @@ def getSlowLogList(dbId, hour):
 
 def getdbReport(dbId, mem):
     dbConfig = Dbconfig.query.get(dbId)
-    base_dir = os.path.dirname(__file__)
     p = subprocess.Popen('perl '+base_dir+'/mysqltuner.pl --host '+str(dbConfig.host)+' --user '+str(dbConfig.user)+' --pass '+str(base64.b64decode(dbConfig.password))+' --port '+str(dbConfig.port)+' --forcemem '+str(mem), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE, shell=True)
     stdout, stderr = p.communicate()
@@ -231,4 +230,17 @@ def send_email(subject, body, receiver):
     thr = Thread(target=send_async_email, args=[app, msg])
     thr.start()
     return u'发送成功'
+def checksqladvisor():
+    sqladvisordir = base_dir + '/sqladvisor'
+    if not os.path.exists(sqladvisordir):
+        os.makedirs(sqladvisordir)
+    if os.path.exists(sqladvisordir+'/sqladvisor'):
+        installtime = time.localtime(os.path.getmtime(sqladvisordir + '/sqladvisor'))
+        installtime = time.strftime('%Y-%m-%d %H:%M:%S', installtime)
+        return u'SQLAdvisor已安装,安装时间：' +str(installtime)
+    else:
+        return u'SQLAdvisor未安装'
+
+
+
 

@@ -233,6 +233,30 @@ def admin_chart(days=7):
 
 
     return render_template('admin_chart.html',dayrange=dayrange, daycounts=daycounts, workstatus=workstatus, dev_dist=dev_dist, audit_dist=audit_dist, days=days)
+@app.route('/modules')
+@admin_permission.require()
+def modules():
+    checksqladvisorresult=checksqladvisor()
+
+
+    return render_template('modules.html',checksqladvisorresult=checksqladvisorresult)
+@app.route('/sqladvisor_install')
+@admin_permission.require()
+def sqladvisor_install():
+    sqladvisor_dir=base_dir+'/sqladvisor'
+    subprocess.Popen('yum install -y http://www.percona.com/downloads/percona-release/redhat/0.1-3/percona-release-0.1-3.noarch.rpm&&yum install -y Percona-Server-shared-56', shell=True)
+    time.sleep(10)
+    subprocess.Popen('rm -rf SQLAdvisor-master&&yum install -y unzip git cmake libaio-devel libffi-devel glib2 glib2-devel&&unzip SQLAdvisor-master.zip&&cd SQLAdvisor-master&&ln -sf /usr/lib64/libperconaserverclient_r.so.18  &&cmake -DBUILD_CONFIG=mysql_release -DCMAKE_BUILD_TYPE=debug -DCMAKE_INSTALL_PREFIX=/usr/local/sqlparser ./&&make && make install&&cd sqladvisor&&cmake -DCMAKE_BUILD_TYPE=debug ./&&make&&chmod +x sqladvisor&&cp -rf sqladvisor '+sqladvisor_dir, shell=True)
+    time.sleep(30)
+    return redirect('modules')
+@app.route('/sqladvisor_uninstall')
+@admin_permission.require()
+def sqladvisor_uninstall():
+    sqladvisor_dir = base_dir + '/sqladvisor'
+    os.remove(sqladvisor_dir+'/sqladvisor')
+    return redirect('modules')
+
+
 @app.route('/slowlog')
 @login_required
 def slowlog():
