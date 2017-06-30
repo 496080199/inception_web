@@ -85,6 +85,17 @@
               <div>
                   <input type = "text" id="code" class="form-control" placeholder="验证码" required=""/>
               </div>
+              <div align="left">
+                  {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+
+                        {% for message in messages %}
+                            <font color="red">{{ message }}</font><br>
+                        {% endfor %}
+
+                    {% endif %}
+                  {% endwith %}
+              </div>
               <div>
                 <input type="submit" class="btn btn-default submit"  onclick="javascript:return validate()" value="登录">
               </div>

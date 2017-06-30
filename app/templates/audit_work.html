@@ -40,7 +40,7 @@
                           <td>{{ work.dev }}</td>
                           <td>{{ work.create_time }}</td>
                           <td>{% if work.finish_time %}{{ work.finish_time }}{% else %}未确定{% endif %}</td>
-                          <td>{% if work.status == 0 %}结束{% elif work.status == 1%}待人工审核{% elif work.status == 2 %}自动审核失败{% elif work.status == 3 %}执行中{% elif work.status == 4 %}执行异常{% elif work.status == 5 %}开发人中止{% elif work.status == 6 %}审核人中止{% elif work.status == 7 %}管理员中止{% endif %}</td>
+                          <td>{% if work.status == 0 %}结束{% elif work.status == 1%}待人工审核{% elif work.status == 2 %}自动审核失败{% elif work.status == 3 %}执行中{% elif work.status == 4 %}执行异常{% elif work.status == 5 %}开发人中止{% elif work.status == 6 %}审核人中止{% elif work.status == 7 %}管理员中止{% elif work.status == 8 %}审核人驳回{% endif %}</td>
                           <td><a type="button" href="{{ url_for('work_view',id=work.id) }}" class="btn btn-round btn-primary btn-xs">查看</a></td>
                           <!--<td>
                               {% if work.status ==  1 %}

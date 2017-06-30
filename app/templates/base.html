@@ -84,7 +84,18 @@
             </nav>
           </div>
         </div>
-        <!-- /top navigation -->
+        <!-- /flashes -->
+      <div>
+      {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul class=flashes>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+      {% endwith %}
+      </div>
 
         <!-- page content -->
           {% block content %}

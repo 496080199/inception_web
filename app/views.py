@@ -33,11 +33,17 @@ def login():
     form=LoginForm()
     if form.validate_on_submit():
         user=User.query.filter(User.name == form.name.data).first()
-        if user is not None and check_password_hash(user.hash_pass, form.passwd.data):
-            login_user(user)
-            identity_changed.send(current_app._get_current_object(),
-                                  identity=Identity(user.id))
-            return redirect('dashboard')
+        if user is not None:
+            if check_password_hash(user.hash_pass, form.passwd.data):
+                login_user(user)
+                identity_changed.send(current_app._get_current_object(),
+                                      identity=Identity(user.id))
+                return redirect('dashboard')
+            else:
+                flash(u'密码不正确！')
+        else:
+            flash(u'用户不存在！')
+
 
 
     return render_template('login.html', form=form)
@@ -207,7 +213,7 @@ def admin_chart(days=7):
 
     works = db.session.query(Work.status).filter(Work.create_time >= dayago)
 
-    workstatus={u'正常结束':0, u'待人工审核':0, u'自动审核失败':0, u'执行中':0, u'执行异常':0, u'开发人中止':0, u'审核人中止':0, u'管理员中止':0}
+    workstatus={u'正常结束':0, u'待人工审核':0, u'自动审核失败':0, u'执行中':0, u'执行异常':0, u'开发人中止':0, u'审核人中止':0, u'管理员中止':0, u'审核人驳回':0}
     for work in works:
         if work.status == 0:
             workstatus[u'正常结束']+=1
@@ -225,6 +231,8 @@ def admin_chart(days=7):
             workstatus[u'审核人中止']+=1
         elif work.status == 7:
             workstatus[u'管理员中止']+=1
+        elif work.status == 8:
+            workstatus[u'审核人驳回']+=1
 
     dev_dist = db.session.query(Work.dev.label('dev'),
                                 func.count(Work.dev).label('count')).filter(Work.create_time >= dayago).group_by(Work.dev)
@@ -260,7 +268,10 @@ def sqladvisor_uninstall():
 @app.route('/slowlog')
 @login_required
 def slowlog():
-    dbconfigs = Dbconfig.query.all()
+    if current_user.role == 'dev':
+        dbconfigs = current_user.dbs
+    else:
+        dbconfigs = Dbconfig.query.all()
 
     return render_template('slowlog.html', dbconfigs=dbconfigs)
 @app.route('/view_slowlog/<int:dbid>/<int:t>')
@@ -447,7 +458,7 @@ def dev_chart(days=7):
         daycounts.append(daycount)
     sevendayago = today-timedelta(days=days)
     works = Work.query.filter(Work.dev == current_user.name, Work.create_time >= sevendayago).group_by(Work.status)
-    workstatus={u'正常结束':0, u'待人工审核':0, u'自动审核失败':0, u'执行中':0, u'执行异常':0, u'开发人中止':0, u'审核人中止':0, u'管理员中止':0}
+    workstatus={u'正常结束':0, u'待人工审核':0, u'自动审核失败':0, u'执行中':0, u'执行异常':0, u'开发人中止':0, u'审核人中止':0, u'管理员中止':0, u'审核人驳回':0}
     for work in works:
         if work.status == 0:
             workstatus[u'正常结束']+=1
@@ -465,6 +476,8 @@ def dev_chart(days=7):
             workstatus[u'审核人中止']+=1
         elif work.status == 7:
             workstatus[u'管理员中止']+=1
+        elif work.status == 8:
+            workstatus[u'审核人驳回']+=1
 
 
     return render_template('dev_chart.html',dayrange=dayrange, daycounts=daycounts, workstatus=workstatus, days=days)
@@ -500,6 +513,16 @@ def audit_work_assign(id):
         return redirect('audit_work')
 
     return render_template('audit_work_assign.html', form=form, work=work, audits=audits)
+
+@app.route('/audit_work/reject/<int:id>')
+@audit_permission.require()
+def audit_work_reject(id):
+    work = Work.query.filter(Work.id == id).first()
+    work.status = 8
+    db.session.commit()
+    flash(u'驳回工单成功！')
+    return redirect('audit_work')
+
 @app.route('/audit_work/execute/<int:id>')
 @audit_permission.require()
 def audit_work_execute(id):
@@ -550,7 +573,7 @@ def audit_chart(days=7):
 
     works = db.session.query(Work.status).filter(Work.audit == current_user.name, Work.create_time >= sevendayago)
 
-    workstatus={u'正常结束':0, u'待人工审核':0, u'自动审核失败':0, u'执行中':0, u'执行异常':0, u'开发人中止':0, u'审核人中止':0, u'管理员中止':0}
+    workstatus={u'正常结束':0, u'待人工审核':0, u'自动审核失败':0, u'执行中':0, u'执行异常':0, u'开发人中止':0, u'审核人中止':0, u'管理员中止':0, u'审核人驳回':0}
     for work in works:
         if work.status == 0:
             workstatus[u'正常结束']+=1
@@ -568,7 +591,8 @@ def audit_chart(days=7):
             workstatus[u'审核人中止']+=1
         elif work.status == 7:
             workstatus[u'管理员中止']+=1
-    from sqlalchemy import func, distinct
+        elif work.status == 8:
+            workstatus[u'审核人驳回']+=1
 
 
 

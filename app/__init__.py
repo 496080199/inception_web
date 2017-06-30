@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_principal import Principal, identity_loaded, RoleNeed, UserNeed
 from flask_login import LoginManager, current_user
 from werkzeug.security import generate_password_hash
+from datetime import timedelta
 
 
 app = Flask(__name__)
@@ -15,6 +16,7 @@ principals = Principal(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 login_manager.session_protection = 'strong'
+login_manager.remember_cookie_duration = timedelta(minutes=15)
 
 mail = Mail(app)
 db = SQLAlchemy(app)

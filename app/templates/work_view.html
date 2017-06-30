@@ -28,11 +28,18 @@
                         </div>
                         <label for="middle-name" class="control-label col-md-1 col-sm-1 col-xs-12">状态：</label>
                         <div class="col-md-2 col-sm-2 col-xs-12">
-                         {% if work.status == 0 %}结束{% elif work.status == 1%}待人工审核{% elif work.status == 2 %}自动审核失败{% elif work.status == 3 %}执行中{% elif work.status == 4 %}执行异常{% elif work.status == 5 %}开发人中止{% elif work.status == 6 %}审核人中止{% elif work.status == 7 %}管理员中止{% endif %}
+                         {% if work.status == 0 %}结束{% elif work.status == 1%}待人工审核{% elif work.status == 2 %}自动审核失败{% elif work.status == 3 %}执行中{% elif work.status == 4 %}执行异常{% elif work.status == 5 %}开发人中止{% elif work.status == 6 %}审核人中止{% elif work.status == 7 %}管理员中止{% elif work.status == 8 %}审核人驳回{% endif %}
                         </div>
                       </div>
+                      {% if current_user.role == 'dev' %}
+                        <div class=" col-md-3 col-sm-3 col-xs-12">
+                            <button type="button" class="btn btn-round btn-info btn-lg" onclick="javascript:location.href='{{ url_for('dev_work') }}';">返回</button>
+                        </div>
+                      {% elif current_user.role == 'audit' %}
+
                       <div class=" col-md-3 col-sm-3 col-xs-12">
                           {% if work.status ==  1 %}
+                              <button type="button" class="btn btn-primary btn-round btn-lg" onclick="javascript:if (confirm('确定要驳回')) location.href='{{ url_for('audit_work_reject', id=work.id) }}';" >驳回</button>
                               {% if work.srole == 1 %}
                                         <button type="button" class="btn btn-success btn-round btn-lg" onclick="javascript:location.href='{{ url_for('audit_work_assign', id=work.id) }}';">分派</button>
                                    {% elif work.srole == 0 %}
@@ -43,6 +50,7 @@
                           {% endif %}
                               <button type="button" class="btn btn-round btn-info btn-lg" onclick="javascript:location.href='{{ url_for('audit_work') }}';">返回</button>
                       </div>
+                      {% endif %}
 
 
                 </div>
@@ -76,7 +84,7 @@
 
                                         <td>
                                             {% for t in row.4.split('\n') %}
-                                                {{ t }}<br>
+                                                {{ loop.index }}.{{ t }}<br>
                                             {% endfor %}
                                          </td>
                                         <td>{{ row.6 }}</td>

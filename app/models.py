@@ -11,7 +11,7 @@ dbs = db.Table('dbs',
 class User(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(64), unique = True)
-    email = db.Column(db.String(120), unique = True)
+    email = db.Column(db.String(120))
     role = db.Column(db.String(120))
     srole =db.Column(db.Integer, default=0)
     hash_pass = db.Column(db.String(200))

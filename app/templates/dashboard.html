@@ -6,30 +6,28 @@
 
                 <ul class="nav side-menu">
                   <li><a href="{{ url_for('dashboard') }}"><h3> 首页</h3> </a></li>
-                  <li><a><i class="fa"></i> 数据库管理 <span class="fa fa-chevron-down"></span></a>
+                  <li><a><h3>数据库管理<span class="fa fa-chevron-down"></span></h3></a></li>
                   {% if current_user.role == 'dev' %}
 
-                    <ul class="nav ">
+                    <ul class="nav " align="center">
                       <li><a href="{{ url_for('dev_work') }}">我的工单</a></li>
                       <li><a href="{{ url_for('dev_work_create') }}">发起sql工单</a></li>
                       <li><a href="{{ url_for('dev_chart',days=7) }}">工单图表</a></li>
                       <li><a href="{{ url_for('slowlog') }}">慢查询</a></li>
                     </ul>
                   {% endif %}
-                  </li>
                   {% if current_user.role == 'audit' %}
 
-                    <ul class="nav ">
+                    <ul class="nav " align="center">
                       <li><a href="{{ url_for('audit_work') }}">我的工单</a></li>
                       <li><a href="{{ url_for('audit_work_pending') }}">待审核工单</a></li>
                       <li><a href="{{ url_for('audit_chart',days=7) }}">工单图表</a></li>
-                      <li><a href="{{ url_for('slowlog') }}">慢查询</a></li>
                     </ul>
 
                   {% endif %}
                   {% if current_user.role == 'admin' %}
 
-                    <ul class="nav ">
+                    <ul class="nav " align="center">
                       <li><a href="{{url_for('mysql_db')}}">MySQL数据库</a></li>
                       <li><a href="{{url_for('user')}}">人员管理</a></li>
                       <li><a href="{{ url_for('admin_chart',days=7) }}">工单图表</a></li>
