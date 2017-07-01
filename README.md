@@ -12,6 +12,7 @@
 - __工单邮件通知__
 - __查看慢查询__
 - __MySQLTuner生成配置分析报告__（需安装perl)
+- __SQLAdvisor语句优化功能__（安装模块）
 ## 配置文件：
 config.py
 ## 安装配置：
@@ -58,7 +59,13 @@ http://(部署服务器IP):5000/login<br>
 初始帐号密码：admin/admin<br>
 注：防火墙端口5000需要放开<br>
 
-7.依次添加数据库，开发人员，审核人员，开始工作。
+7.依次添加数据库，开发人员（分配数据库），审核人员，开始工作。
+
+8.模块安装<br>
+SQLAdvisor安装：<br>
+下载https://github.com/Meituan-Dianping/SQLAdvisor/archive/master.zip压缩包放至本系统根目录下，<br>
+即可通过模块管理进行安装，安装需要几分钟，请耐心等待后刷新页面看到。<br>
+
 <br>
 <br>
 -------有更多idea欢迎和我一起交流分享，谢谢！我的QQ：496080199<br>

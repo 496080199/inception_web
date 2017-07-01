@@ -44,6 +44,53 @@ def criticalDDL(sqlContent):
         return None
 
 
+def getAlldbByDbconfig(dbConfigName):
+    dbConfig = Dbconfig.query.filter(Dbconfig.name == dbConfigName).first()
+    if not dbConfig:
+        print("Error: 数据库配置不存在")
+    dbHost = dbConfig.host
+    dbPort = dbConfig.port
+    dbUser = dbConfig.user
+    dbPassword = base64.b64decode(dbConfig.password)
+    listDb = []
+    conn = None
+    cursor = None
+
+    try:
+        conn = MySQLdb.connect(host=dbHost, port=dbPort, user=dbUser, passwd=dbPassword,
+                               charset='utf8')
+        cursor = conn.cursor()
+        sql = "show databases"
+        n = cursor.execute(sql)
+        listDb = [row[0] for row in cursor.fetchall()
+                  if row[0] not in ('information_schema', 'performance_schema', 'mysql', 'test')]
+    except MySQLdb.Warning as w:
+        print(str(w))
+    except MySQLdb.Error as e:
+        print(str(e))
+    finally:
+        if cursor is not None:
+            cursor.close()
+        if conn is not None:
+            conn.commit()
+            conn.close()
+    return listDb
+
+def mysqladvisorcheck(sqlContent, dbConfigName, dbUse):
+    dbConfig = Dbconfig.query.filter(Dbconfig.name == dbConfigName).first()
+    if not dbConfig:
+        print("Error: 数据库配置不存在")
+    dbHost = dbConfig.host
+    dbPort = dbConfig.port
+    dbUser = dbConfig.user
+    dbPassword = base64.b64decode(dbConfig.password)
+    print (base_dir+'/sqladvisor/sqladvisor -h '+str(dbHost)+' -P '+str(dbPort)+' -u '+str(dbUser)+' -p '+str(dbPassword)+' -d '+str(dbUse)+' -q "'+sqlContent+'" -v 1')
+    p=subprocess.Popen(base_dir+'/sqladvisor/sqladvisor -h '+str(dbHost)+' -P '+str(dbPort)+' -u '+str(dbUser)+' -p '+str(dbPassword)+' -d '+str(dbUse)+' -q "'+str(sqlContent)+'" -v 1', stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE, shell=True)
+    stdout, stderr = p.communicate()
+    if stdout:
+        return stdout
+    return stderr
 def sqlautoReview(sqlContent, dbConfigName, isBackup=False):
     '''
     将sql交给inception进行自动审核，并返回审核结果。
