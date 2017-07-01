@@ -63,7 +63,7 @@ http://(部署服务器IP):5000/login<br>
 
 8.模块安装<br>
 SQLAdvisor安装：<br>
-下载https://github.com/Meituan-Dianping/SQLAdvisor/archive/master.zip压缩包放至本系统根目录下，<br>
+下载 https://github.com/Meituan-Dianping/SQLAdvisor/archive/master.zip 压缩包放至本系统根目录下，<br>
 即可通过模块管理进行安装，安装需要几分钟，请耐心等待后刷新页面看到。<br>
 
 <br>
