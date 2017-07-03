@@ -5,8 +5,8 @@ from flask_login import current_user, login_user, logout_user , login_required
 from app.form import *
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_principal import Identity, AnonymousIdentity, identity_changed, Permission, RoleNeed
-from datetime import date, timedelta
-import  os
+import time
+import random
 
 from sqlalchemy import func
 from app.utils import *
@@ -257,14 +257,14 @@ def sqladvisor_install():
     if release == 'centos':
         subprocess.Popen('yum install -y http://www.percona.com/downloads/percona-release/redhat/0.1-3/percona-release-0.1-3.noarch.rpm&&yum install -y Percona-Server-shared-56', shell=True)
         time.sleep(10)
-        subprocess.Popen('rm -rf SQLAdvisor-master&&yum install -y unzip git cmake libaio-devel libffi-devel glib2 glib2-devel&&unzip SQLAdvisor-master.zip&&cd SQLAdvisor-master&&ln -sf /usr/lib64/libperconaserverclient_r.so.18  &&cmake -DBUILD_CONFIG=mysql_release -DCMAKE_BUILD_TYPE=debug -DCMAKE_INSTALL_PREFIX=/usr/local/sqlparser ./&&make && make install&&cd sqladvisor&&cmake -DCMAKE_BUILD_TYPE=debug ./&&make&&chmod +x sqladvisor&&cp -rf sqladvisor '+sqladvisor_dir, shell=True)
+        subprocess.Popen('rm -rf SQLAdvisor-master&&yum install -y unzip cmake libaio-devel libffi-devel glib2 glib2-devel&&unzip SQLAdvisor-master.zip&&cd SQLAdvisor-master&&ln -sf /usr/lib64/libperconaserverclient_r.so.18  &&cmake -DBUILD_CONFIG=mysql_release -DCMAKE_BUILD_TYPE=debug -DCMAKE_INSTALL_PREFIX=/usr/local/sqlparser ./&&make && make install&&cd sqladvisor&&cmake -DCMAKE_BUILD_TYPE=debug ./&&make&&chmod +x sqladvisor&&cp -rf sqladvisor '+sqladvisor_dir, shell=True)
     elif release == 'ubuntu':
         subprocess.Popen(
             'apt-get install -y http://www.percona.com/downloads/percona-release/redhat/0.1-3/percona-release-0.1-3.noarch.rpm&&apt-get install -y Percona-Server-shared-56',
             shell=True)
         time.sleep(10)
         subprocess.Popen(
-            'rm -rf SQLAdvisor-master&&apt-get install -y unzip git cmake libaio-devel libffi-devel glib2 glib2-devel&&unzip SQLAdvisor-master.zip&&cd SQLAdvisor-master&&ln -sf /usr/lib64/libperconaserverclient_r.so.18  &&cmake -DBUILD_CONFIG=mysql_release -DCMAKE_BUILD_TYPE=debug -DCMAKE_INSTALL_PREFIX=/usr/local/sqlparser ./&&make && make install&&cd sqladvisor&&cmake -DCMAKE_BUILD_TYPE=debug ./&&make&&chmod +x sqladvisor&&cp -rf sqladvisor ' + sqladvisor_dir,
+            'rm -rf SQLAdvisor-master&&apt-get install -y unzip cmake libaio-devel libffi-devel glib2 glib2-devel&&unzip SQLAdvisor-master.zip&&cd SQLAdvisor-master&&ln -sf /usr/lib64/libperconaserverclient_r.so.18  &&cmake -DBUILD_CONFIG=mysql_release -DCMAKE_BUILD_TYPE=debug -DCMAKE_INSTALL_PREFIX=/usr/local/sqlparser ./&&make && make install&&cd sqladvisor&&cmake -DCMAKE_BUILD_TYPE=debug ./&&make&&chmod +x sqladvisor&&cp -rf sqladvisor ' + sqladvisor_dir,
             shell=True)
     time.sleep(180)
     return redirect('modules')
@@ -348,7 +348,10 @@ def dev_work_create():
         sqlContent = sqlContent.rstrip()
         if sqlContent[-1] == ";":
             work = Work()
-            work.name = form.name.data
+            if form.name.data:
+                work.name = form.name.data
+            else:
+                work.name = 't_'+current_user.name+'_'+str(int(time.time())) + str(random.randint(0, 9)) + str(random.randint(0, 9)) + str(random.randint(0, 9)) + str(random.randint(0, 9)) + str(random.randint(0, 9)) + str(random.randint(0, 9))
             work.db_config = dbConfig
             work.backup = isBackup
             work.dev = current_user.name
@@ -471,8 +474,9 @@ def sqladvisor_check():
         dbUse = data['dbUse']
         sqlContent = data['sqlContent']
         sqlContent = sqlContent.rstrip()
+        sqlContent = sqlContent.replace('\n', '')
         sqlList = sqlContent.split(';')
-        #sqlContent = sqlContent.replace('\n', '')
+
         sqlList.reverse()
         sqlResult={}
         for sqldata in sqlList:
@@ -481,10 +485,7 @@ def sqladvisor_check():
                 sqlResult.setdefault(sqldata)
                 result= mysqladvisorcheck(sqldata, dbConfig, dbUse)
                 result = result.split('\n\n')
-
                 sqlResult[sqldata] = result
-                print result
-        #print sqlResult
         return json.dumps(sqlResult)
     dbconfigs=current_user.dbs
     return render_template('sqladvisor_check.html', dbconfigs=dbconfigs)

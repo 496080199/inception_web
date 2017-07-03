@@ -25,7 +25,7 @@ class UserForm(FlaskForm):
 class UserDbForm(FlaskForm):
     db = IntegerField(u'数据库', validators=[DataRequired()])
 class WorkForm(FlaskForm):
-    name = StringField(u'工单名', validators=[DataRequired()])
+    name = StringField(u'工单名')
     db_config = StringField(u'数据库', validators=[DataRequired()])
     backup = BooleanField(u'备份', validators=[DataRequired()])
     audit = StringField(u'审核人', validators=[DataRequired()])

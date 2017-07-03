@@ -84,7 +84,6 @@ def mysqladvisorcheck(sqlContent, dbConfigName, dbUse):
     dbPort = dbConfig.port
     dbUser = dbConfig.user
     dbPassword = base64.b64decode(dbConfig.password)
-    print (base_dir+'/sqladvisor/sqladvisor -h '+str(dbHost)+' -P '+str(dbPort)+' -u '+str(dbUser)+' -p '+str(dbPassword)+' -d '+str(dbUse)+' -q "'+sqlContent+'" -v 1')
     p=subprocess.Popen(base_dir+'/sqladvisor/sqladvisor -h '+str(dbHost)+' -P '+str(dbPort)+' -u '+str(dbUser)+' -p '+str(dbPassword)+' -d '+str(dbUse)+' -q "'+str(sqlContent)+'" -v 1', stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE, shell=True)
     stdout, stderr = p.communicate()

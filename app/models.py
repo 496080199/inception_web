@@ -3,6 +3,7 @@ from app import db
 from datetime import datetime
 
 
+
 dbs = db.Table('dbs',
         db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
         db.Column('dbconfig_id', db.Integer, db.ForeignKey('dbconfig.id'))
@@ -36,7 +37,7 @@ class User(db.Model):
         return '<User %r>' % (self.name)
 class Dbconfig(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), unique = True)
+    name = db.Column(db.String(100), unique = True )
     host = db.Column(db.String(200),)
     port = db.Column(db.Integer,default=3306)
     user = db.Column(db.String(100))
