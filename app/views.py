@@ -303,6 +303,7 @@ def dbreport(id):
         report = Report()
         report.db_name = dbconfig.name
         report.mem = form.mem.data
+        report.create_time = datetime.now()
         report.report_content = getdbReport(id, form.mem.data)
         db.session.add(report)
         db.session.commit()
