@@ -574,6 +574,7 @@ def audit_work_reject(id):
     work = Work.query.filter(Work.id == id).first()
     work.status = 8
     db.session.commit()
+    stoptimer(work)
     flash(u'驳回工单成功！')
     return redirect('audit_work')
 
@@ -592,6 +593,44 @@ def audit_work_execute(id):
 
 
     return redirect('audit_work')
+@app.route('/audit_work/timer/<int:id>', methods = ['GET', 'POST'])
+@audit_permission.require()
+def audit_work_timer(id):
+    work=Work.query.get(id)
+    if request.method == "POST":
+        data=request.form
+        timer=datetime.strptime(data["dt"], "%Y-%m-%dT%H:%M")
+        executetime = (timer - datetime.now()).seconds
+        if executetime > 0 and work.status == 1:
+            stoptimer(work)
+            work.timer=timer
+            db.session.commit()
+            starttimer(work, executetime)
+        else:
+            flash(u'已过时间点')
+    return render_template('audit_work_timer.html', work=work)
+@app.route('/audit_work/timer/cancel/<int:id>')
+@audit_permission.require()
+def audit_work_timer_cancel(id):
+    work = Work.query.get(id)
+    stoptimer(work)
+    work.timer = ''
+    db.session.commit()
+    return redirect(url_for('audit_work_timer',id=id))
+@app.route('/audit_work/timer/view')
+@audit_permission.require()
+def audit_work_timer_view():
+    works=[]
+    for item in threading.enumerate():
+        if item.name:
+            work=Work.query.filter(Work.name==item.name).first()
+            if work:
+                works.append(work)
+    return render_template('audit_work_timer_view.html', works=works)
+
+
+
+
 @app.route('/audit_work/exportsql/<int:id>')
 @audit_permission.require()
 def audit_work_exportsql(id):
@@ -661,16 +700,23 @@ def audit_chart(days=7):
 @login_required
 def work_view(id):
     work = Work.query.get(id)
+    backtimer=0
+    for item in threading.enumerate():
+        if item.name == work.name:
+            backtimer=1
     if work.status == 0:
         review_content=json.loads(work.execute_result)
     else:
         review_content=json.loads(work.auto_review)
-    return render_template('work_view.html', work=work, review_content=review_content)
+    return render_template('work_view.html', work=work, review_content=review_content,backtimer=backtimer)
 
 @app.route('/work/stop/<int:id>')
 @login_required
 def work_stop(id):
     work = Work.query.get(id)
+    stoptimer(work)
+
+
     if current_user.role == 'dev':
         work.status = 5
         work.finish_time = datetime.now()

@@ -43,7 +43,8 @@
                               {% if work.srole == 1 %}
                                         <button type="button" class="btn btn-success btn-round btn-lg" onclick="javascript:location.href='{{ url_for('audit_work_assign', id=work.id) }}';">分派</button>
                                    {% elif work.srole == 0 %}
-                                        <button type="button" class="btn btn-success btn-round btn-lg" onclick="javascript:if (confirm('确定要执行?')) location.href='{{ url_for('audit_work_execute',id=work.id) }}';">执行</button>
+                                        {% if backtimer == 0 %}<button type="button" class="btn btn-success btn-round btn-lg" onclick="javascript:if (confirm('确定要执行?')) location.href='{{ url_for('audit_work_execute',id=work.id) }}';">执行</button>{% endif %}
+                                        <button type="button" class="btn btn-success btn-round btn-lg" onclick="javascript: location.href='{{ url_for('audit_work_timer',id=work.id) }}';">定时执行</button>
                               {% endif %}
                               <button type="button" class="btn btn-round btn-danger btn-lg" onclick="javascript:if (confirm('确定要终止?')) location.href='{{ url_for('work_stop',id=work.id) }}';">中止</button>
 

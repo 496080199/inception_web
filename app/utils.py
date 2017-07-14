@@ -2,6 +2,7 @@
 
 import os, re, sys, json, subprocess,time, stat
 import MySQLdb
+import threading
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -127,7 +128,7 @@ def executeFinal(id):
     将sql交给inception进行最终执行，并返回执行结果。
     '''
     work = Work.query.filter(Work.id == id).first()
-    if work.status == 3:
+    if work.status == 3 or work.status == 0:
         return redirect('audit_work')
     work.status = 3
     work.man_review_time = datetime.now()
@@ -286,6 +287,16 @@ def checksqladvisor():
         return u'SQLAdvisor已安装,安装时间：' +str(installtime)
     else:
         return u'SQLAdvisor未安装'
+
+def stoptimer(work):
+    for item in threading.enumerate():
+        if item.name == work.name:
+            item.cancel()
+def starttimer(work, executetime):
+    t = threading.Timer(executetime, executeFinal, [work.id])
+    t.name = work.name
+    t.setDaemon(True)
+    t.start()
 
 
 
