@@ -54,7 +54,7 @@ class Work(db.Model):
     audit = db.Column(db.String(64))
     srole = db.Column(db.Integer, default=0)
     sql_content = db.Column(db.TEXT(16777215))
-    db_config = db.Column(db.String(64))
+    db_config = db.Column(db.String(128))
     backup = db.Column(db.Boolean, default=True)
     status = db.Column(db.Integer, nullable=False)
     create_time = db.Column(db.DateTime, default=datetime.now())
