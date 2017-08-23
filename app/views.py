@@ -614,7 +614,7 @@ def audit_work_timer(id):
 def audit_work_timer_cancel(id):
     work = Work.query.get(id)
     stoptimer(work)
-    work.timer = ''
+    work.timer = None
     db.session.commit()
     return redirect(url_for('audit_work_timer',id=id))
 @app.route('/audit_work/timer/view')
